@@ -1,7 +1,7 @@
 {
   "name": "masareef-wallet",
-  "version": "5.1.0",
-  "description": "برنامج المصاريف الخرافي — تطبيق أندرويد (Capacitor)",
+  "version": "7.0.0",
+  "description": "برنامج المصاريف اليومي — تطبيق أندرويد (Capacitor)",
   "private": true,
   "scripts": {
     "setup": "npm install && npx cap add android && node setup-android.mjs && npx cap sync android",
