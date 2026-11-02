@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>برنامج المصاريف اليومي — v7.0</title>
+    <title>برنامج المصاريف اليومي — v7.1</title>
     <meta name="theme-color" content="#0d9488">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2071,6 +2071,24 @@ th { background: #f3f7f6; }
 /* بطاقات العملات */
 #currency-cards-container .card { overflow: hidden; }
 
+/* v7.1: جداول → بطاقات على الجوال */
+@media (max-width: 767px) {
+  table.rt, table.rt tbody, table.rt tr, table.rt td { display: block; width: 100%; }
+  table.rt thead { display: none; }
+  table.rt tbody tr { background: #fff; border: 1px solid #e6ecea; border-radius: 22px; padding: 10px 14px; margin-bottom: 12px; box-shadow: var(--sh); }
+  table.rt tbody tr:hover td { background: transparent; }
+  table.rt td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; border-bottom: 1px dashed #edf2f0; text-align: left; font-size: .88rem; }
+  table.rt td:last-child { border-bottom: none; }
+  table.rt td:empty { display: none; }
+  table.rt td::before { content: attr(data-label); flex: 0 0 auto; color: #94a3b8; font-size: .72rem; font-weight: 700; text-align: right; }
+  table.rt td[data-label=""]::before { content: none; }
+  table.rt td > * { max-width: 100%; }
+  table.rt tr.rt-note { box-shadow: none; text-align: center; }
+  table.rt tr.rt-note td { justify-content: center; text-align: center; }
+  .overflow-x-auto:has(> table.rt), .card.overflow-x-auto:has(table.rt) { overflow-x: visible; }
+  #sec-history .card, #sec-bills .card { padding: 14px; }
+}
+
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -3400,7 +3418,7 @@ th { background: #f3f7f6; }
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.0 (النسخة · الإصدار)</div>
+    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.1 (النسخة · الإصدار)</div>
     <div id="toast-box"></div>
 
 
@@ -3516,7 +3534,7 @@ th { background: #f3f7f6; }
 /* =====================================================================
    برنامج المصاريف اليومي — الجزء 1: الأساسيات، البيانات، لوحة المتابعة، تسجيل الحركات
    ===================================================================== */
-const APP_VERSION = '7.0';
+const APP_VERSION = '7.1';
 const isNativeApp = () => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) { return false; } };
 const nativePlugin = n => { try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]) || null; } catch (e) { return null; } };
 const LS_KEY = 'my_wallet_data_v2';
@@ -8330,6 +8348,21 @@ renderSyncCard = function () {
         ? `<div class="set-invite"><b>📲 ربط جهاز آخر بسهولة</b><p class="eq-hint">يرسل رسالة واتساب جاهزة، يلصقها الطرف الآخر فيرتبط تلقائياً.</p><button type="button" class="btn-primary text-sm px-4 py-2" onclick="invSend()">📲 أرسل دعوة عبر واتساب</button></div>`
         : `<div class="set-invite"><b>📥 عندك دعوة؟</b><textarea id="inv-text" class="input-field text-xs mt-2" rows="2" dir="ltr" placeholder="الصق رسالة الدعوة كاملة هنا"></textarea><div class="flex gap-2 mt-2"><button type="button" class="btn-secondary text-xs px-3 py-2" onclick="invPaste()">📋 الصق من الحافظة</button><button type="button" class="btn-primary text-sm px-4 py-2 flex-1" onclick="invApply()">قراءة الدعوة</button></div></div>`);
 };
+
+/* ---------- v7.1: الجداول تتحول إلى بطاقات على الجوال (نفس البيانات، تنسيق فقط) ---------- */
+const RT_BODIES = ['my-trusts-body', 'bills-table-body', 'history-table-body', 'arch-table-body', 'pending-table-body', 'my-pending-table-body'];
+function rtLabel() {
+    RT_BODIES.forEach(id => {
+        const tb = $(id); if (!tb) return; const tbl = tb.closest('table'); if (!tbl) return; tbl.classList.add('rt');
+        const heads = [...tbl.querySelectorAll('thead th')].map(th => (th.title && !th.textContent.trim() ? '' : th.textContent.trim()));
+        tb.querySelectorAll(':scope > tr').forEach(tr => {
+            if (tr.dataset.rtDone === String(tr.children.length)) return; tr.dataset.rtDone = String(tr.children.length);
+            [...tr.children].forEach((td, i) => { if (!td.hasAttribute('colspan')) td.setAttribute('data-label', heads[i] || ''); else tr.classList.add('rt-note'); });
+        });
+    });
+}
+(function () { let q = 0; const sched = () => { if (q) return; q = requestAnimationFrame(() => { q = 0; try { rtLabel(); } catch (e) { } }); };
+    new MutationObserver(sched).observe(document.body, { childList: true, subtree: true }); sched(); })();
 
 /* ---------- التشغيل ---------- */
 migrate();
