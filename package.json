@@ -1,6 +1,6 @@
 {
   "name": "masareef-wallet",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "برنامج المصاريف اليومي — تطبيق أندرويد (Capacitor)",
   "private": true,
   "scripts": {
