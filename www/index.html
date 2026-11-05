@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>برنامج المصاريف اليومي — v7.1</title>
+    <title>برنامج المصاريف اليومي — v7.13</title>
     <meta name="theme-color" content="#0d9488">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -73,6 +73,7 @@
     --color-indigo-50: oklch(96.2% 0.018 272.314);
     --color-indigo-100: oklch(93% 0.034 272.788);
     --color-indigo-200: oklch(87% 0.065 274.039);
+    --color-indigo-300: oklch(78.5% 0.115 274.713);
     --color-indigo-500: oklch(58.5% 0.233 277.117);
     --color-indigo-700: oklch(45.7% 0.24 277.023);
     --color-indigo-800: oklch(39.8% 0.195 277.366);
@@ -114,6 +115,7 @@
     --container-md: 28rem;
     --container-lg: 32rem;
     --container-2xl: 42rem;
+    --container-3xl: 48rem;
     --container-5xl: 64rem;
     --container-7xl: 80rem;
     --text-xs: 0.75rem;
@@ -569,11 +571,17 @@
   .w-40 {
     width: calc(var(--spacing) * 40);
   }
+  .w-52 {
+    width: calc(var(--spacing) * 52);
+  }
   .w-full {
     width: 100%;
   }
   .max-w-2xl {
     max-width: var(--container-2xl);
+  }
+  .max-w-3xl {
+    max-width: var(--container-3xl);
   }
   .max-w-5xl {
     max-width: var(--container-5xl);
@@ -616,6 +624,9 @@
   }
   .list-decimal {
     list-style-type: decimal;
+  }
+  .list-disc {
+    list-style-type: disc;
   }
   .grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -676,6 +687,9 @@
   }
   .gap-4 {
     gap: calc(var(--spacing) * 4);
+  }
+  .gap-5 {
+    gap: calc(var(--spacing) * 5);
   }
   .gap-6 {
     gap: calc(var(--spacing) * 6);
@@ -815,6 +829,9 @@
   .border-indigo-200 {
     border-color: var(--color-indigo-200);
   }
+  .border-indigo-300 {
+    border-color: var(--color-indigo-300);
+  }
   .border-indigo-500 {
     border-color: var(--color-indigo-500);
   }
@@ -947,6 +964,12 @@
   .bg-indigo-50 {
     background-color: var(--color-indigo-50);
   }
+  .bg-indigo-50\/40 {
+    background-color: color-mix(in srgb, oklch(96.2% 0.018 272.314) 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-indigo-50) 40%, transparent);
+    }
+  }
   .bg-indigo-50\/70 {
     background-color: color-mix(in srgb, oklch(96.2% 0.018 272.314) 70%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -955,6 +978,9 @@
   }
   .bg-indigo-100 {
     background-color: var(--color-indigo-100);
+  }
+  .bg-indigo-200 {
+    background-color: var(--color-indigo-200);
   }
   .bg-lime-100 {
     background-color: var(--color-lime-100);
@@ -1564,6 +1590,10 @@
     -webkit-user-select: all;
     user-select: all;
   }
+  .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
   .last\:border-0:last-child {
     border-style: var(--tw-border-style);
     border-width: 0px;
@@ -1702,6 +1732,9 @@
     }
     .lg\:grid-cols-4 {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .lg\:grid-cols-6 {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
     .lg\:flex-row {
       flex-direction: row;
@@ -2218,6 +2251,9 @@ th { background: #f3f7f6; }
             <button id="tab-reserves" onclick="showTab('reserves')" class="nav-btn rounded-xl">
                 <span>🔒</span> <span>المبالغ المخصصة</span>
             </button>
+            <button id="tab-inherit" onclick="showTab('inherit')" class="nav-btn rounded-xl">
+                <span>🕌</span> <span>المواريث والزكوات</span>
+            </button>
             <button id="tab-calendar" onclick="showTab('calendar')" class="nav-btn rounded-xl">
                 <span>📅</span> <span>التقويم</span>
             </button>
@@ -2329,7 +2365,7 @@ th { background: #f3f7f6; }
                 <div class="flex flex-col md:flex-row justify-between md:items-center gap-3 border-b pb-3">
                     <h3 class="text-lg font-black text-slate-800">🔮 التوقعات المالية واتجاه المصاريف</h3>
                     <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-bold">
-                        <span>العملة:</span><select id="fc-currency" onchange="renderForecast()" class="bg-transparent font-bold outline-none text-teal-800"></select>
+                        <span id="fc-owner-wrap" class="flex items-center gap-2"><span>الحساب:</span><select id="fc-owner" onchange="renderForecast()" class="bg-transparent font-bold outline-none text-teal-800"></select></span><span>العملة:</span><select id="fc-currency" onchange="renderForecast()" class="bg-transparent font-bold outline-none text-teal-800"></select>
                     </div>
                 </div>
                 <div id="forecast-kpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
@@ -2526,14 +2562,16 @@ th { background: #f3f7f6; }
                     <datalist id="tags-list"></datalist>
                 </div>
 
-                <div class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-3 space-y-2">
-                    <label class="block font-bold text-xs text-slate-700">📷 قراءة إيصال/إشعار (تعبئة المبلغ والتاريخ تلقائياً)</label>
+                <details id="scan-box" class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-3">
+                    <summary class="cursor-pointer font-bold text-xs text-slate-700 select-none">📷 قراءة إيصال/إشعار بنكي (تعبئة المبلغ والتاريخ تلقائياً) — اضغط للفتح</summary>
+                    <div class="space-y-2 mt-3">
                     <input type="file" id="scan-file" accept="image/*" onchange="scanReceipt(this)" class="input-field text-xs bg-white">
                     <textarea id="scan-paste" rows="2" class="input-field text-xs" placeholder="أو الصق نص رسالة الإشعار البنكي هنا..."></textarea>
                     <button type="button" onclick="scanPasted()" class="btn-secondary text-xs px-3 py-1.5">🔎 استخراج المبلغ والتاريخ من النص</button>
                     <div id="scan-result" class="text-xs text-slate-600"></div>
                     <label class="flex items-center gap-2 text-xs font-bold text-slate-700"><input type="checkbox" id="scan-attach" checked> إرفاق صورة الإيصال بالحركة</label>
-                </div>
+                    </div>
+                </details>
 
                 <div>
                     <label class="block mb-1.5 font-bold text-sm text-slate-700">تاريخ الحركة</label>
@@ -3049,6 +3087,10 @@ th { background: #f3f7f6; }
             </div>
         </section>
 
+        <section id="sec-inherit" class="hidden space-y-5">
+            <div id="inherit-body" class="space-y-5"></div>
+        </section>
+
         <section id="sec-settings" class="hidden space-y-6">
             <div class="card p-6 border-2 border-teal-300 bg-teal-50/30 space-y-4">
                 <h3 class="text-lg font-extrabold text-teal-900 flex items-center gap-2">
@@ -3193,26 +3235,23 @@ th { background: #f3f7f6; }
                         <button onclick="snapshotNow()" class="btn-primary text-xs py-2">📌 إنشاء لقطة الآن</button>
                     </div>
                 </div>
-                <div id="admin-import-card" class="card p-6 border-r-8 border-indigo-500 space-y-3">
-                    <h3 class="text-lg font-bold text-slate-800">📥 استيراد سجلات من Excel</h3>
-                    <p class="eq-hint">نزّل القالب، عبّئه (الحقول الأساسية قوائم منسدلة من إعداداتك)، ثم ارفعه لتراجع السجلات قبل اعتمادها.</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="downloadImportTemplate()" class="btn-secondary text-xs py-2">⬇️ تحميل القالب</button>
-                        <label class="btn-primary text-xs py-2 cursor-pointer">⬆️ رفع ملف التعبئة<input type="file" accept=".xlsx,.csv" class="hidden" onchange="handleImportFile(event)"></label>
+                <div id="admin-import-card" class="card p-6 border-r-8 border-indigo-500 space-y-4 md:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-800">📗 Excel: استيراد وتصدير</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-3 bg-slate-50 rounded-2xl p-4">
+                            <b class="text-sm text-slate-700">📥 استيراد سجلات</b>
+                            <p class="eq-hint">نزّل القالب، عبّئه (الحقول الأساسية قوائم منسدلة من إعداداتك)، ثم ارفعه لتراجع السجلات قبل اعتمادها.</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="downloadImportTemplate()" class="btn-secondary text-xs py-2">⬇️ تحميل القالب</button>
+                                <label class="btn-primary text-xs py-2 cursor-pointer text-center">⬆️ رفع ملف التعبئة<input type="file" accept=".xlsx,.csv" class="hidden" onchange="handleImportFile(event)"></label>
+                            </div>
+                        </div>
+                        <div id="admin-export-card" class="space-y-3 bg-slate-50 rounded-2xl p-4">
+                            <b class="text-sm text-slate-700">📊 تصدير كل البيانات</b>
+                            <p class="eq-hint">ملف واحد: لوحة ملخص لكل صاحب مال وعملة، والأرصدة، والحركات الحالية والأرشيف، والديون والفواتير والأهداف والمخصصات والأمانات.</p>
+                            <button onclick="exportAllExcel()" class="btn-primary text-sm px-5 py-2.5 w-full">📊 تصدير كل السجلات إلى Excel</button>
+                        </div>
                     </div>
-                </div>
-                <div id="admin-export-card" class="card p-6 border-r-8 border-emerald-500 space-y-3 md:col-span-2">
-                    <h3 class="text-lg font-bold text-slate-800">📊 تصدير كل البيانات إلى Excel</h3>
-                    <p class="eq-hint">ملف واحد فيه: لوحة ملخص (إيداع وصرف وصافي ورصيد لكل صاحب مال وعملة)، والأرصدة التفصيلية، وكل الحركات الحالية والمؤرشفة، والديون والفواتير والأهداف والمخصصات والأمانات. احتفظ به كنسخة للطوارئ بجانب النسخ الاحتياطي (JSON).</p>
-                    <button onclick="exportAllExcel()" class="btn-primary text-sm px-5 py-2.5">📊 تصدير كل السجلات إلى Excel</button>
-                </div>
-                <div id="admin-drive-card" class="card p-6 border-r-8 border-sky-500 space-y-3 md:col-span-2">
-                    <h3 class="text-lg font-bold text-slate-800">☁️ النسخ الاحتياطي على Google Drive</h3>
-                    <div id="drive-card-body" class="space-y-3"></div>
-                </div>
-                <div id="admin-app-card" class="card p-6 border-r-8 border-indigo-500 space-y-3 md:col-span-2">
-                    <h3 class="text-lg font-bold text-slate-800">📱 التطبيق والجوال</h3>
-                    <div id="app-card-body" class="space-y-3"></div>
                 </div>
                 <div id="admin-eq-settings" class="card p-6 border-r-8 border-teal-500 space-y-3 md:col-span-2">
                     <h3 class="text-lg font-bold text-slate-800">≈ المعادلات بالعملات الأخرى</h3>
@@ -3227,19 +3266,6 @@ th { background: #f3f7f6; }
                     <p id="rates-info" class="eq-hint"></p>
                     <div id="rates-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
                 </div>
-                <div class="card p-6 border-r-8 border-teal-600 space-y-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-teal-100 text-teal-700 rounded-xl flex items-center justify-center text-lg">
-                            <i class="fa-solid fa-rotate"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-slate-800">المزامنة اللحظية بين الأجهزة 🔐</h3>
-                            <p class="text-xs text-slate-500">مشفّرة ودمج لكل سجل — تحتاج إنترنت عند الربط فقط</p>
-                        </div>
-                    </div>
-                    <div id="sync-card-body" class="space-y-3"></div>
-                </div>
-
                 <div class="card p-6 border-r-8 border-emerald-600 space-y-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center text-lg">
@@ -3259,6 +3285,14 @@ th { background: #f3f7f6; }
                             <input type="file" onchange="importBackup(event)" class="hidden" accept=".json">
                         </label>
                     </div>
+                </div>
+                <div id="admin-zakat-settings" class="card p-6 border-r-8 border-amber-500 space-y-3 md:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-800">🕌 إعدادات الزكاة</h3>
+                    <div id="zakat-settings-body" class="space-y-3"></div>
+                </div>
+                <div id="admin-app-card" class="card p-6 border-r-8 border-indigo-500 space-y-3 md:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-800">📱 التطبيق والجوال</h3>
+                    <div id="app-card-body" class="space-y-3"></div>
                 </div>
             </div>
         </section>
@@ -3418,7 +3452,7 @@ th { background: #f3f7f6; }
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.1 (النسخة · الإصدار)</div>
+    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.13 (النسخة · الإصدار)</div>
     <div id="toast-box"></div>
 
 
@@ -3534,7 +3568,7 @@ th { background: #f3f7f6; }
 /* =====================================================================
    برنامج المصاريف اليومي — الجزء 1: الأساسيات، البيانات، لوحة المتابعة، تسجيل الحركات
    ===================================================================== */
-const APP_VERSION = '7.1';
+const APP_VERSION = '7.13';
 const isNativeApp = () => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) { return false; } };
 const nativePlugin = n => { try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]) || null; } catch (e) { return null; } };
 const LS_KEY = 'my_wallet_data_v2';
@@ -3914,7 +3948,7 @@ function updateUIRoles() {
     ['tx-owner', 'goal-owner', 'debt-owner'].forEach(id => { const el = $(id); if (el) { if (!main) el.value = currentUser; el.disabled = !main; } });
 }
 
-const TABS = ['dashboard', 'add', 'bills', 'history', 'budgets', 'goals', 'debts', 'reserves', 'calendar', 'settings', 'pending', 'my-pending'];
+const TABS = ['dashboard', 'add', 'bills', 'history', 'budgets', 'goals', 'debts', 'reserves', 'inherit', 'calendar', 'settings', 'pending', 'my-pending'];
 function showTab(tabId) {
     document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
     document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
@@ -4215,6 +4249,19 @@ function renderTrustCards() {
         </div>`; }).join('') : '<div class="text-center text-slate-400 text-sm py-6">لا توجد أمانات</div>';
 }
 
+/* ---------- v7.12: استقلال كل حساب + قوائم فرز ---------- */
+const OWNSEL = {};
+function ownLegacy() { return (appData.users.find(u => u.role === 'رئيسي') || appData.users[0] || {}).name || currentUser; }
+function ownMigrate() { const L = ownLegacy(); (appData.bills || []).forEach(b => { if (!b.owner) b.owner = L; }); (appData.budgets || []).forEach(b => { if (!b.owner) b.owner = L; }); }
+function ownView(k) { if (!isMain()) return currentUser; const v = OWNSEL[k]; return v === '__all' ? null : (v || currentUser); }
+function ownBar(k, fnName) {
+    if (!isMain()) return '';
+    const v = OWNSEL[k] || currentUser;
+    return `<div class="card p-3 flex flex-wrap items-center gap-2 text-sm"><b>👤 عرض حساب:</b><select class="input-field text-xs w-52" onchange="ownSet('${k}',this.value,${fnName})"><option value="__all" ${v === '__all' ? 'selected' : ''}>كل الحسابات</option>${appData.users.map(u => `<option value="${esc(u.name)}" ${v === u.name ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}</select></div>`;
+}
+function ownSet(k, v, fn) { OWNSEL[k] = v; fn(); }
+function ownBarInto(id, k, fnName, anchor) { let b = $(id); if (!b) { b = document.createElement('div'); b.id = id; anchor.parentNode.insertBefore(b, anchor); } b.innerHTML = ownBar(k, fnName); }
+
 /* =====================================================================
    الجزء 2: المدفوعات الدورية + الإشعارات + الأهداف + السقوف
    ===================================================================== */
@@ -4289,8 +4336,9 @@ function renderBillDueFields() {
 function handleSaveBill(e) {
     e.preventDefault();
     const period = $('bill-period').value;
+    ownMigrate();
     const b = {
-        id: uid(), name: $('bill-name').value.trim(), amount: parseFloat($('bill-amount').value), currency: $('bill-currency').value,
+        owner: currentUser, id: uid(), name: $('bill-name').value.trim(), amount: parseFloat($('bill-amount').value), currency: $('bill-currency').value,
         equivalentCurrencies: getEq('bill'), category: $('bill-category').value,
         period, startDate: $('bill-startdate').value,
         dueDay: period === 'day' ? 1 : parseInt($('bill-dueday').value, 10), dueMonth: $('bill-duemonth') ? parseInt($('bill-duemonth').value, 10) : null,
@@ -4315,22 +4363,24 @@ function billStatus(b) {
     return ['قادم', 'bg-amber-100 text-amber-800'];
 }
 function renderBills() {
-    const tbody = $('bills-table-body'); if (!tbody) return;
-    if (!appData.bills.length) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-slate-400 py-6">لا توجد التزامات أو فواتير دورية مسجلة</td></tr>`; return; }
-    tbody.innerHTML = appData.bills.map(b => {
-        const [st, cls] = billStatus(b);
+    const tbody = $('bills-table-body'); if (!tbody) return; ownMigrate();
+    ownBarInto('bills-own-bar', 'bills', 'renderBills', tbody.closest('.card') || tbody);
+    const vo = ownView('bills'), list = appData.bills.filter(b => !vo || b.owner === vo);
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-slate-400 py-6">لا توجد التزامات أو فواتير دورية مسجلة</td></tr>`; return; }
+    tbody.innerHTML = list.map(b => {
+        const [st, cls] = billStatus(b), can = isMain() || b.owner === currentUser;
         return `<tr>
-            <td><b>${esc(b.name)}</b></td>
+            <td><b>${esc(b.name)}</b>${isMain() && !vo ? `<div class="eq-hint">👤 ${esc(b.owner)}</div>` : ''}</td>
             <td>${amountCell(b)}</td>
             <td>${PERIOD_NAMES[b.period] || ''}<div class="eq-hint">${esc(dueDesc(b))}</div></td>
             <td>${esc(b.category)}</td>
             <td>${esc(b.defaultAccount || b.account || '-')}</td>
             <td>${esc(b.nextDueDate)}<div class="eq-hint">عن ${esc(billPeriodLabel(b, b.nextDueDate))}</div></td>
             <td><span class="badge ${cls}">${esc(st)}</span></td>
-            <td class="text-center whitespace-nowrap">${isMain() ? `
+            <td class="text-center whitespace-nowrap">${can ? `
                 <button onclick="openBillModal(${b.id})" class="px-3 py-1 bg-teal-600 text-white rounded-lg text-xs font-bold">دفع / تفاصيل</button>
                 <button onclick="toggleBillActive(${b.id})" class="px-2 py-1 bg-slate-100 rounded-lg text-xs font-bold" title="إيقاف/تشغيل">${b.active === false ? '▶️' : '⏸️'}</button>
-                <button onclick="deleteBill(${b.id})" class="list-item-delete text-xs font-bold">حذف</button>` : '<span class="text-xs text-slate-400">للمسؤول</span>'}
+                <button onclick="deleteBill(${b.id})" class="list-item-delete text-xs font-bold">حذف</button>` : '<span class="text-xs text-slate-400">—</span>'}
             </td></tr>`;
     }).join('');
 }
@@ -4369,7 +4419,7 @@ function runChecks(summary) {
 /* ---------- الجرس ولوحة الإشعارات ---------- */
 function notifVisible(n) {
     if (n.done) return false;
-    if (n.kind === 'bill') return isMain() && appData.bills.some(b => b.id === n.billId);
+    if (n.kind === 'bill') return appData.bills.some(b => b.id === n.billId && (b.owner || ownLegacy()) === currentUser);
     if (n.user) return n.user === currentUser;
     return isMain();
 }
@@ -4415,7 +4465,7 @@ function openBillModal(id) {
     if (b.lastPaid) rows.push(['آخر دفع', esc(b.lastPaid)]);
     $('bill-modal-content').innerHTML = rows.map(r => `<div class="flex justify-between gap-3 border-b border-slate-100 py-1.5"><span class="text-slate-500">${r[0]}</span><span class="text-left">${r[1]}</span></div>`).join('') +
         ((b.payments || []).length ? `<div class="pt-3"><div class="font-bold text-xs text-slate-700 mb-1">سجل الدفعات السابقة</div>${b.payments.slice().reverse().slice(0, 12).map(p => `<div class="flex justify-between text-xs py-1 border-b border-slate-50"><span>✅ ${esc(p.label)}</span><span class="text-slate-500">دُفعت ${esc(p.paidOn)} — ${fmt(p.amount)} ${esc(p.currency)}</span></div>`).join('')}</div>` : '');
-    $('bill-modal-actions').innerHTML = isMain() ? `
+    $('bill-modal-actions').innerHTML = (isMain() || b.owner === currentUser) ? `
         <button onclick="showPayForm()" class="btn-primary flex-1 py-2 text-sm">💳 دفع الآن</button>
         <button onclick="postponeBill(3)" class="btn-secondary text-sm">تأجيل 3 أيام</button>
         <button onclick="postponeBill(7)" class="btn-secondary text-sm">تأجيل أسبوع</button>`
@@ -4425,8 +4475,8 @@ function openBillModal(id) {
 function closeBillModal() { $('bill-modal').classList.add('hidden'); curBillId = null; }
 function showPayForm() {
     const b = appData.bills.find(x => x.id === curBillId); if (!b) return;
-    $('pay-owner').innerHTML = appData.users.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('');
-    $('pay-owner').value = currentUser;
+    $('pay-owner').innerHTML = appData.users.filter(u => isMain() || u.name === currentUser).map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join('');
+    $('pay-owner').value = (b.owner && appData.users.some(u => u.name === b.owner) && isMain()) ? b.owner : currentUser;
     $('pay-account').innerHTML = appData.accounts.map(a => `<option value="${esc(a.name)}">${esc(a.name)} (${esc(a.type)})</option>`).join('');
     if (b.defaultAccount && getAcc(b.defaultAccount)) $('pay-account').value = b.defaultAccount;
     $('bill-pay-form').classList.remove('hidden'); updatePayBalance();
@@ -4573,7 +4623,7 @@ function processGoals(fresh) {
 function goalAchieved(g) { return round2(g.startBalance + g.currentSaved); }
 function renderGoals() {
     const c = $('goals-list-container'); if (!c) return;
-    const list = appData.goals.filter(g => isMain() || g.ownerName === currentUser);
+    ownBarInto('goals-own-bar', 'goals', 'renderGoals', c); const vo = ownView('goals'), list = appData.goals.filter(g => !vo || g.ownerName === vo);
     if (!list.length) { c.innerHTML = '<div class="card p-8 text-center text-slate-400 md:col-span-2">لا توجد أهداف بعد — أنشئ أول هدف من النموذج أعلاه 🎯</div>'; return; }
     c.innerHTML = list.map(g => {
         const ach = goalAchieved(g), pct = Math.max(0, Math.min(100, ach / g.targetAmount * 100)), rem = Math.max(0, round2(g.targetAmount - ach));
@@ -4652,8 +4702,9 @@ function handleSaveBudget(e) {
     const auto = document.querySelector('input[name="budget-apply"]:checked').value === 'auto';
     if (!auto && !budgetSel.size) { toast('اختر شهراً أو أسبوعاً واحداً على الأقل', 'err'); return; }
     const bd = budgetBounds(period, todayStr());
+    ownMigrate();
     appData.budgets.push({
-        id: uid(), category: $('budget-cat').value, amount, currency: $('budget-currency').value, equivalentCurrencies: getEq('budget'),
+        owner: currentUser, id: uid(), category: $('budget-cat').value, amount, currency: $('budget-currency').value, equivalentCurrencies: getEq('budget'),
         period, autoRenew: auto, appliedPeriods: auto ? [] : [...budgetSel].sort((a, b) => a - b),
         periodStart: auto ? bd.start : null, periodEnd: auto ? bd.end : null, status: 'نشط', createdAt: new Date().toISOString()
     });
@@ -4666,17 +4717,36 @@ function renewBudgets(fresh) {
         b.status = 'منتهي'; const bd = budgetBounds(b.period, t);
         const nb = Object.assign({}, b, { id: uid(), periodStart: bd.start, periodEnd: bd.end, status: 'نشط', renewedFrom: b.id, createdAt: new Date().toISOString() });
         appData.budgets.push(nb); changed = true;
-        const n = { id: uid(), key: 'budget|' + nb.id, kind: 'budget', done: false, date: new Date().toISOString(), title: 'تجديد سقف تلقائي', body: `${b.category} — ${b.period}: ${fmtRaw(b.amount)} ${b.currency} (${bd.start} → ${bd.end})` };
+        const n = { id: uid(), key: 'budget|' + nb.id, kind: 'budget', user: nb.owner || ownLegacy(), done: false, date: new Date().toISOString(), title: 'تجديد سقف تلقائي', body: `${b.category} — ${b.period}: ${fmtRaw(b.amount)} ${b.currency} (${bd.start} → ${bd.end})` };
         appData.notifications.unshift(n); if (fresh) fresh.push(n);
     });
     return changed;
 }
+/** نطاق السقوف: صاحب الحساب المتصفح فقط (المدير يستطيع اختيار آخر أو «الكل») */
+let BUD_OWNER = null;
+function budgetOwner() { return ownView('budgets'); }
+function budgetMonthTxs(b) {
+    const t = todayStr(), y = +t.slice(0, 4), m = +t.slice(5, 7), s0 = `${y}-${pad(m)}-01`, e0 = `${y}-${pad(m)}-${pad(dim(y, m))}`, bo = b.owner || ownLegacy(), out = [];
+    allMovements().forEach(x => {
+        if (!isExpense(x) || x.currency !== b.currency || x.date < s0 || x.date > e0 || (bo && x.owner !== bo)) return;
+        const amt = b.category === ALL_CAT ? x.amount : catParts(x).filter(p => p.category === b.category).reduce((s, p) => s + p.amount, 0);
+        if (amt > 0) out.push({ date: x.date, label: x.party || x.notes || x.category || '—', amt });
+    });
+    return out.sort((a, c) => c.date.localeCompare(a.date));
+}
+function budgetMonthHtml(b) {
+    const L = budgetMonthTxs(b); if (!L.length) return '<div class="text-[11px] text-slate-400">لا حركات في هذا السقف خلال الشهر الحالي</div>';
+    const tot = round2(L.reduce((s, x) => s + x.amt, 0));
+    return `<details class="text-xs"><summary class="cursor-pointer font-bold text-slate-600">🧾 حركات هذا الشهر (${L.length}) · ${fmt(tot)} ${esc(b.currency)}</summary><div class="mt-1 divide-y">${L.slice(0, 20).map(x => `<div class="flex justify-between gap-2 py-1"><span class="truncate">${esc(x.date.slice(5))} · ${esc(x.label)}</span><b>${fmt(x.amt)}</b></div>`).join('')}${L.length > 20 ? `<div class="py-1 text-slate-400">+ ${L.length - 20} حركة أخرى</div>` : ''}</div></details>`;
+}
+function setBudgetOwner(v) { OWNSEL.budgets = v; renderBudgets(); try { renderDashboard(); } catch (e) { } }
 function evalBudget(b) {
     const t = todayStr(), cur = budgetBounds(b.period, t); let win, active = true;
     if (b.autoRenew) win = { start: b.periodStart, end: b.periodEnd };
     else { active = (b.appliedPeriods || []).includes(cur.index); win = { start: cur.start, end: cur.end }; }
-    let spent = 0;
+    let spent = 0; const bo = b.owner || ownLegacy();
     if (active) allMovements().forEach(x => {
+        if (bo && x.owner !== bo) return;
         if (isExpense(x) && x.currency === b.currency && x.date >= win.start && x.date <= win.end) spent += b.category === ALL_CAT ? x.amount : catParts(x).filter(p => p.category === b.category).reduce((s, p) => s + p.amount, 0);
     });
     return { active, win, spent: round2(spent), pct: b.amount ? spent / b.amount * 100 : 0 };
@@ -4687,8 +4757,10 @@ function budgetApplyText(b) {
 }
 function renderBudgets() {
     const c = $('budgets-list-container'), w = $('ai-budget-warnings'); if (!c) return;
-    const act = appData.budgets.filter(b => b.status === 'نشط'), ended = appData.budgets.filter(b => b.status !== 'نشط');
+    ownMigrate(); const vo = ownView('budgets'), mineB = appData.budgets.filter(b => !vo || b.owner === vo), act = mineB.filter(b => b.status === 'نشط'), ended = mineB.filter(b => b.status !== 'نشط');
     let warns = '';
+    const bar = $('budget-scope-bar') || (() => { const d = document.createElement('div'); d.id = 'budget-scope-bar'; c.parentNode.insertBefore(d, c); return d; })();
+    bar.innerHTML = isMain() ? ownBar('budgets', 'renderBudgets') : '<div class="text-xs text-slate-500 font-bold px-1">سقوفك أنت فقط — أنشئ ما يناسبك، لا تتأثر بسقوف غيرك.</div>';
     const card = (b, ev) => {
         const cls = ev.pct >= 100 ? 'over' : ev.pct >= 80 ? 'warn' : '';
         return `<div class="card p-5 space-y-3 ${ev.active ? '' : 'opacity-70'}">
@@ -4700,7 +4772,8 @@ function renderBudgets() {
             <div class="pbar ${cls}"><div style="width:${Math.min(100, ev.pct).toFixed(1)}%"></div></div>
             <div class="flex justify-between text-sm font-bold"><span>${ev.pct.toFixed(0)}%</span><span>${fmt(ev.spent)} / ${fmt(b.amount)} ${esc(b.currency)}</span></div>
             ${eqLine(b)}
-            <div class="text-xs text-slate-500">المتبقي: <b>${fmt(Math.max(0, b.amount - ev.spent))}</b> · الفترة ${esc(ev.win.start)} ← ${esc(ev.win.end)}</div>`
+            <div class="text-xs text-slate-500">المتبقي: <b>${fmt(Math.max(0, b.amount - ev.spent))}</b> · الفترة ${esc(ev.win.start)} ← ${esc(ev.win.end)}</div>
+            ${budgetMonthHtml(b)}`
             : '<div class="text-xs text-slate-500 py-2">غير مفعّل في الفترة الحالية (خارج الأشهر/الأسابيع المختارة)</div>'}
         </div>`;
     };
@@ -5177,7 +5250,8 @@ async function handleSaveDebt(e) {
 function renderDebts() {
     const box = $('debts-list'); if (!box) return;
     try { renderPeople(); } catch (e) { }
-    const list = visibleDebts();
+    ownBarInto('debts-own-bar', 'debts', 'renderDebts', box); const dvo = ownView('debts');
+    const list = visibleDebts().filter(d => !dvo || d.owner === dvo);
     // الملخص لكل عملة
     const sum = {};
     list.forEach(d => { if (!d.principal) return; const s = sum[d.currency] = sum[d.currency] || { me: 0, on: 0 }; if (d.kind === 'forMe') s.me += debtRemaining(d); else s.on += debtRemaining(d); });
@@ -6008,7 +6082,7 @@ function askReserveChoiceFor(o) {
 function askReserveChoice(tx) {
     const sel = $('tx-reserve'), pick = sel && !$('field-reserve').classList.contains('hidden') ? sel.value : 'auto';
     if (pick === 'none') return null;
-    if (pick && pick !== 'auto') return pick;
+    if (pick && pick !== 'auto') { const r = appData.reserves.find(x => String(x.id) === String(pick)); return r ? r.id : null; }
     return askReserveChoiceFor({ owner: tx.owner, currency: tx.currency, category: tx.category, party: tx.party, amount: tx.amount });
 }
 /** يمنع (بتأكيد) صرفاً يمسّ المحجوز */
@@ -6018,7 +6092,7 @@ function guardReserved(tx) {
     let draw = 0;
     if (tx.lines && tx.lines.some(l => l.reserveId)) {
         const cap = {}; tx.lines.forEach(l => { if (!l.reserveId) return; const r = appData.reserves.find(x => String(x.id) === String(l.reserveId)); if (!r) return; const left = rsvRemaining(r) - (cap[r.id] || 0), u = Math.min(+l.amount || 0, Math.max(0, left)); cap[r.id] = (cap[r.id] || 0) + u; draw += u; });
-    } else if (tx.reserveId) { const r = appData.reserves.find(x => x.id === tx.reserveId); if (r) draw = Math.min(+tx.amount || 0, rsvRemaining(r)); }
+    } else if (tx.reserveId) { const r = appData.reserves.find(x => String(x.id) === String(tx.reserveId)); if (r) draw = Math.min(+tx.amount || 0, rsvRemaining(r)); }
     const need = round2((+tx.amount || 0) - draw); if (need <= 0) return true;
     const reserved = reservedOf(owner, tx.currency), free = round2(ownerBalance(owner, tx.currency) - reserved);
     if (need <= free + 0.005) return true;
@@ -6037,7 +6111,7 @@ function applyReserveUse(tx) {
         tx.reserveUsed = round2(tot); return;
     }
     if (!tx.reserveId) return;
-    const r = appData.reserves.find(x => x.id === tx.reserveId); if (!r) { delete tx.reserveId; return; }
+    const r = appData.reserves.find(x => String(x.id) === String(tx.reserveId)); if (!r) { delete tx.reserveId; return; }
     const use = Math.min(+tx.amount || 0, rsvRemaining(r));
     tx.reserveUsed = use; r.used = round2((+r.used || 0) + use);
     r.history.push({ date: tx.date || todayStr(), kind: 'use', amount: use, txId: tx.id, note: tx.party || '' });
@@ -6057,7 +6131,7 @@ function revertAllReserve(tx) {
 }
 function revertReserveUse(tx) {
     if (!tx.reserveId || !tx.reserveUsed) return;
-    const r = appData.reserves.find(x => x.id === tx.reserveId); if (!r) return;
+    const r = appData.reserves.find(x => String(x.id) === String(tx.reserveId)); if (!r) return;
     r.used = Math.max(0, round2((+r.used || 0) - tx.reserveUsed));
     r.history.push({ date: todayStr(), kind: 'revert', amount: tx.reserveUsed, txId: tx.id, note: 'حذف الحركة' });
     if (r.status === 'مستنفد') r.status = 'نشط';
@@ -6147,13 +6221,13 @@ function renderReserves() {
     const box = $('reserves-list'); if (!box) return;
     ['active', 'all'].forEach(k => { const b = $('rf-' + k); if (b) b.classList.toggle('active', rsvFilter === k); });
     initExtraDropdowns();
-    const mine = appData.reserves.filter(rsvVisible), list = mine.filter(r => rsvFilter === 'all' || r.status === 'نشط');
+    ownBarInto('rsv-own-bar', 'rsv', 'renderReserves', box); const rvo = ownView('rsv'); const mine = appData.reserves.filter(rsvVisible).filter(r => !rvo || r.owner === rvo), list = mine.filter(r => rsvFilter === 'all' || r.status === 'نشط');
     // ملخص لكل عملة
     const cur = {}; mine.filter(r => r.status === 'نشط').forEach(r => { (cur[r.currency] = cur[r.currency] || { rem: 0, tot: 0, used: 0 }); cur[r.currency].rem += rsvRemaining(r); cur[r.currency].tot += r.amount; cur[r.currency].used += r.used; });
     const sum = $('reserves-summary');
     sum.innerHTML = Object.keys(cur).map(c => {
         const sc = { owner: isMain() ? null : currentUser };
-        const bal = appData.users.filter(u => isMain() || u.name === currentUser).reduce((s, u) => s + ownerBalance(u.name, c), 0), free = round2(bal - cur[c].rem);
+        const bal = appData.users.filter(u => rvo ? u.name === rvo : (isMain() || u.name === currentUser)).reduce((s, u) => s + ownerBalance(u.name, c), 0), free = round2(bal - cur[c].rem);
         return `<div class="card p-4 border-t-4 border-purple-500"><div class="text-xs text-slate-500 font-bold">${esc(curLabel(c))}</div>
             <div class="text-sm font-bold mt-1">🔒 محجوز: <span class="text-purple-700">${fmt(cur[c].rem)}</span></div>
             <div class="text-sm font-bold">✅ متاح للصرف العام: <span class="${free < 0 ? 'text-rose-600' : 'text-emerald-700'}">${fmt(free)}</span></div></div>`;
@@ -6243,7 +6317,7 @@ function fcBalance(cur, sc) {
 }
 function upcomingCommitments(cur, sc, from, to) {
     let tot = 0;
-    if (isMain()) appData.bills.filter(b => b.active !== false && b.currency === cur && !sc.owner).forEach(b => {
+    appData.bills.filter(b => b.active !== false && b.currency === cur && ((isMain() && !sc.owner) || (b.owner || ownLegacy()) === (sc.owner || currentUser))).forEach(b => {
         let d = nextOcc(b, from, true), g = 0; while (d && d <= to && g++ < 40) { if (d >= b.nextDueDate) tot += +b.amount || 0; d = nextOcc(b, d, false); }
     });
     appData.goals.filter(g => g.status === 'نشط' && g.currency === cur && (!sc.owner || g.ownerName === sc.owner)).forEach(g => {
@@ -6259,7 +6333,7 @@ function upcomingCommitments(cur, sc, from, to) {
 function renderForecast() {
     const k = $('forecast-kpis'); if (!k) return;
     const sel = $('fc-currency'); if (!sel || !sel.value) return;
-    const cur = sel.value, sc = dashScope(), t = todayStr(), y = +t.slice(0, 4), m = +t.slice(5, 7), endM = `${t.slice(0, 7)}-${pad(dim(y, m))}`;
+    const cur = sel.value, sc = fcScope(), t = todayStr(), y = +t.slice(0, 4), m = +t.slice(5, 7), endM = `${t.slice(0, 7)}-${pad(dim(y, m))}`;
     const mv = allMovements().filter(visible).filter(x => x.currency === cur && fcScopeOk(x, sc) && (!sc.account || accNameOf(x) === sc.account));
     const exp = mv.filter(x => x.type === 'صرف' || x.type === 'recurring_payment');
     const first = exp.reduce((a, x) => (!a || x.date < a ? x.date : a), ''), span = first ? Math.min(30, Math.max(7, daysBetween(first, t) + 1)) : 30;
@@ -6361,7 +6435,7 @@ function calNav(d) { if (!calYM) calToday(); let { y, m } = calYM; m += d; if (m
 function calEvents(y, m) {
     const first = `${y}-${pad(m)}-01`, last = `${y}-${pad(m)}-${pad(dim(y, m))}`, ev = {};
     const add = (d, o) => { (ev[d] = ev[d] || []).push(o); };
-    if (isMain()) appData.bills.filter(b => b.active !== false).forEach(b => {
+    appData.bills.filter(b => b.active !== false && (ownView('bills') === null || (b.owner || ownLegacy()) === ownView('bills'))).forEach(b => {
         let d = nextOcc(b, first, true), g = 0;
         while (d && d <= last && g++ < 40) { add(d, { k: 'bill', txt: b.name, amt: b.amount, cur: b.currency, done: d < b.nextDueDate }); d = nextOcc(b, d, false); }
     });
@@ -6819,9 +6893,10 @@ function saveBuckets(id) {
    ===================================================================== */
 const personKey = s => normAr(s);
 const getPerson = n => (appData.people || []).find(p => personKey(p.name) === personKey(n));
-function ensurePerson(n) { n = (n || '').trim(); if (!n) return null; let p = getPerson(n); if (!p) { p = { name: n }; appData.people.push(p); } return p; }
+function ensurePerson(n) { n = (n || '').trim(); if (!n) return null; let p = getPerson(n); if (!p) { p = { name: n, by: currentUser }; appData.people.push(p); } return p; }
 function refreshPeopleList() {
-    const names = new Set((appData.people || []).map(p => p.name)); appData.debts.forEach(d => names.add(d.person));
+    const names = new Set(); const mine = new Set(visibleDebts().map(d => personKey(d.person)));
+    (appData.people || []).forEach(p => { if (isMain() || p.by === currentUser || mine.has(personKey(p.name))) names.add(p.name); }); visibleDebts().forEach(d => names.add(d.person));
     const dl = $('people-list'); if (dl) dl.innerHTML = [...names].map(n => `<option value="${esc(n)}">`).join('');
 }
 /** نافذة اختيار عامة: تعيد معرّف الزر المضغوط */
@@ -6891,7 +6966,8 @@ async function debtOverlapFlow(d) {
 /* ---------- دفتر الأسماء ---------- */
 function renderPeople() {
     const box = $('people-body'); if (!box) return;
-    const ps = (appData.people || []).slice().sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+    const myNames = new Set(visibleDebts().map(d => personKey(d.person)));
+    const ps = (appData.people || []).filter(p => isMain() || p.by === currentUser || myNames.has(personKey(p.name))).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
     box.innerHTML = ps.length ? ps.map(p => `<div class="flex flex-wrap items-center gap-2 py-2 border-b text-xs">
         <b class="text-sm flex-1 min-w-[8rem]">${esc(p.name)}${p.phone ? ` <span class="text-slate-400 font-normal" dir="ltr">${esc(p.phone)}</span>` : ''}</b>
         <label class="flex items-center gap-1"><input type="checkbox" ${p.noMerge ? 'checked' : ''} onchange="setPersonFlag('${esc(p.name).replace(/'/g, "\\'")}','noMerge',this.checked)"> لا تسأل عن الدمج</label>
@@ -6914,7 +6990,7 @@ async function importContacts() {
 }
 /* ---------- كشف حساب شخص ---------- */
 function personLedgerData(name) {
-    const key = personKey(name), debts = appData.debts.filter(d => personKey(d.person) === key), cur = {}, rows = [];
+    const key = personKey(name), debts = visibleDebts().filter(d => personKey(d.person) === key), cur = {}, rows = [];
     debts.forEach(d => {
         const c = cur[d.currency] = cur[d.currency] || { lent: 0, lentPaid: 0, borrowed: 0, borPaid: 0 }, me = d.kind === 'forMe';
         if (me) { c.lent += d.amount; c.lentPaid += debtPaid(d); } else { c.borrowed += d.amount; c.borPaid += debtPaid(d); }
@@ -8364,6 +8440,918 @@ function rtLabel() {
 (function () { let q = 0; const sched = () => { if (q) return; q = requestAnimationFrame(() => { q = 0; try { rtLabel(); } catch (e) { } }); };
     new MutationObserver(sched).observe(document.body, { childList: true, subtree: true }); sched(); })();
 
+/* ---------- v7.2: التوقعات لكل مستخدم + استعادة صورة الإشعار المفقودة ---------- */
+function fcScope() {
+    const d = dashScope();
+    if (!isMain()) return { ...d, owner: currentUser };
+    const s = $('fc-owner'), names = appData.users.map(u => u.name), want = [ALL_OWNERS, ...names].join('|');
+    if (s && s.dataset.sig !== want) { const keep = s.value; s.innerHTML = [ALL_OWNERS, ...names].map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join(''); s.dataset.sig = want; if ([ALL_OWNERS, ...names].includes(keep)) s.value = keep; }
+    const v = s ? s.value : ALL_OWNERS; return { ...d, owner: v && v !== ALL_OWNERS ? v : null };
+}
+function fcApplyUi() { const w = $('fc-owner-wrap'); if (w) w.style.display = isMain() ? 'flex' : 'none'; }
+const _renderForecast = renderForecast;
+renderForecast = function () { try { fcApplyUi(); } catch (e) { } return _renderForecast(); };
+
+let _rcPendingKey = null;
+async function viewReceipt(id) {
+    const t = allMovements().find(x => x.id === id) || appData.pendingTransactions.find(x => x.id === id);
+    const ref = t && receiptOf(t); if (!ref) { toast('لا توجد صورة مرفقة', 'warn'); return; }
+    const src = await loadReceiptImage(ref);
+    if (src) { $('image-modal-img').src = src; $('image-modal').classList.remove('hidden'); return; }
+    if (!isMain() || !String(ref).startsWith('idb:')) { toast('الصورة غير موجودة على هذا الجهاز — اطلب من المسؤول الرئيسي إعادة رفعها أو استرجاع نسخة احتياطية فيها الصور', 'warn', 7000); return; }
+    if (!confirm('صورة هذا الإشعار غير موجودة على هذا الجهاز.\nهل تريد اختيار الصورة من هذا الجهاز وتحميلها مرة أخرى؟')) return;
+    _rcPendingKey = ref.slice(4);
+    let inp = $('rc-reupload'); if (!inp) { inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.id = 'rc-reupload'; inp.className = 'hidden'; inp.onchange = rcReuploadDone; document.body.appendChild(inp); }
+    inp.value = ''; inp.click();
+}
+async function rcReuploadDone(e) {
+    const f = e.target.files && e.target.files[0]; if (!f || !_rcPendingKey) return;
+    const url = await readImageFile(f); if (!url) { toast('تعذّرت قراءة الصورة', 'err'); return; }
+    try { await idbPut('images', _rcPendingKey, url); toast('تم تحميل الصورة على هذا الجهاز ✔ — ستدخل في النسخ الاحتياطي القادم', 'ok', 5000); $('image-modal-img').src = url; $('image-modal').classList.remove('hidden'); renderAll(); }
+    catch (err) { toast('تعذّر الحفظ على هذا الجهاز', 'err'); }
+    _rcPendingKey = null;
+}
+
+/* ---------- v7.3: المستخدم الفرعي لا يرى اختيار أصحاب المال إطلاقاً ---------- */
+function subLock() {
+    const main = isMain(), fw = $('fc-owner-wrap'); if (fw) fw.style.display = main ? 'flex' : 'none';
+    const so = $('stats-owner'); if (so) { const w = so.closest('div'); if (w) w.style.display = main ? '' : 'none'; if (!main) { so.innerHTML = `<option value="${esc(currentUser)}">${esc(currentUser)}</option>`; so.value = currentUser; } }
+}
+const _updateUIRoles = updateUIRoles;
+updateUIRoles = function () { const r = _updateUIRoles.apply(this, arguments); try { subLock(); } catch (e) { } return r; };
+const _renderStats = renderStats;
+renderStats = function () { try { subLock(); } catch (e) { } return _renderStats.apply(this, arguments); };
+
+/* v7.3.1: بعد تسجيل الدخول تُعاد رسم كل الشاشات (التوقعات كانت تبقى بحساب المستخدم السابق/الرئيسي) */
+const _attemptLogin = attemptLogin;
+attemptLogin = function () { const r = _attemptLogin.apply(this, arguments); try { if ($('login-overlay').classList.contains('hidden')) { renderAll(); subLock(); } } catch (e) { console.error(e); } return r; };
+const _logout = logout;
+logout = function () { const r = _logout.apply(this, arguments); try { const s = $('fc-owner'); if (s) s.value = ALL_OWNERS; } catch (e) { } return r; };
+
+/* =====================================================================
+   v7.6 — المواريث والزكوات (للحساب الرئيسي)
+   أداة تسجيل وحساب مساعِدة وليست فتوى: النصاب والحول والأنصبة تُراجَع مع مفتٍ/القاضي.
+   ===================================================================== */
+const ZK_DEF = { cur: '', gold24: 0, silver: 0, rate: 2.5, nisabBase: 'silver', hawlRule: 'break', deductDebts: true, addReceivables: true };
+function zkSet() { const s = appData.settings; s.zakat = Object.assign({}, ZK_DEF, s.zakat || {}); if (!s.zakat.cur) s.zakat.cur = (s.totalCur || appData.currencies[0] || 'ILS'); return s.zakat; }
+function zkData() { const d = appData.zakat = appData.zakat || {}; d.gold = d.gold || []; d.paid = d.paid || []; d.cycle = d.cycle || {}; d.override = d.override || {}; return d; }
+function estData() { return (appData.estates = appData.estates || []); }
+const NISAB_GOLD_G = 85, NISAB_SILVER_G = 595;
+
+/* ---------- التقويم الهجري ---------- */
+function hijriParts(ds) {
+    try { const p = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(parseYMD(ds)), g = t => +(p.find(x => x.type === t) || {}).value; return { y: g('year'), m: g('month'), d: g('day') }; } catch (e) { return null; }
+}
+function hijriFmt(ds) { try { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }).format(parseYMD(ds)); } catch (e) { return ''; } }
+/** تاريخ حلول الحول: بعد سنة هجرية من تاريخ البدء (وإلا 354 يوماً) */
+function hawlDue(ds) {
+    const h = hijriParts(ds); if (!h) return addDays(ds, 354);
+    for (let n = 345; n <= 365; n++) { const c = addDays(ds, n), x = hijriParts(c); if (x && x.y === h.y + 1 && x.m === h.m && x.d >= h.d) return c; if (x && x.y === h.y + 1 && x.m === h.m + 1) return addDays(c, -1); }
+    return addDays(ds, 354);
+}
+
+/* ---------- الحساب ---------- */
+function zkMetalValue(it, S) { const w = +it.weight || 0; if (it.type === 'silver') return round2(w * (+S.silver || 0)); return round2(w * ((+it.karat || 24) / 24) * (+S.gold24 || 0)); }
+function zkNisab(S) { const base = S.nisabBase === 'gold' ? NISAB_GOLD_G * (+S.gold24 || 0) : NISAB_SILVER_G * (+S.silver || 0); return base > 0 ? round2(base) : null; }
+function zkChoices() { return isMain() ? zkOwners() : [currentUser]; }
+function zkShown() { const c = zkChoices(); if (isMain() && INH.zkSel === '__all') return c; return [c.includes(INH.zkSel) ? INH.zkSel : (c.includes(currentUser) ? currentUser : c[0])]; }
+function zkSel(v) { INH.zkSel = v; renderInherit(); }
+function zkOwners() { return appData.users.map(u => u.name); }
+function zkModel(owner) {
+    const S = zkSet(), D = zkData(), z = S.cur, nisab = zkNisab(S), missing = new Set();
+    const ev = {};   // تاريخ → تغيّر
+    const add = (d, v) => { if (!d) d = '0000-00-00'; ev[d] = (ev[d] || 0) + v; };
+    allMovements().forEach(t => {
+        if (t.type === 'goal_saving') return;      // ما ادّخره لهدف ما زال ملكه
+        balDeltas(t).forEach(d => { if (d.owner !== owner) return; const v = convertAmt(d.delta, d.currency, z); if (v == null) { missing.add(d.currency); return; } add(t.date, v); });
+    });
+    let metals = 0; D.gold.filter(g => g.owner === owner).forEach(g => { const v = zkMetalValue(g, S); metals += v; add(g.acq || null, v); });
+    const dates = Object.keys(ev).sort(); let run = 0; const pts = dates.map(d => { run = round2(run + ev[d]); return { d: d === '0000-00-00' ? '1900-01-01' : d, w: run }; });
+    const cashNow = round2(run - metals);
+    let recv = 0, debt = 0;
+    appData.debts.forEach(d => { if (d.owner !== owner || !d.principal) return; const v = convertAmt(debtRemaining(d), d.currency, z); if (v == null) return; if (d.kind === 'forMe') recv += v; else debt += v; });
+    const wealth = round2(run + (S.addReceivables ? recv : 0) - (S.deductDebts ? debt : 0));
+    // بداية الحول
+    let start = null; const cyc = D.cycle[owner];
+    if (nisab != null && pts.length && run >= nisab) {
+        let k = pts.length - 1;
+        if (S.hawlRule === 'ends') { while (k > 0 && pts[k - 1].w > 0) k--; let j = k; while (j < pts.length && pts[j].w < nisab) j++; start = pts[Math.min(j, pts.length - 1)].d; }
+        else { while (k > 0 && pts[k - 1].w >= nisab) k--; start = pts[k].d; }
+        if (cyc && cyc.from && start < cyc.from) start = cyc.from;
+    }
+    if (D.override[owner]) start = D.override[owner];
+    const today = todayStr(), due = start ? hawlDue(start) : null, reached = nisab != null && wealth >= nisab;
+    const hawlDone = !!(start && reached && due <= today);
+    const amountDue = hawlDone ? round2(wealth * (+S.rate || 2.5) / 100) : 0;
+    const paid = round2(D.paid.filter(p => p.owner === owner && p.hawlDue === due).reduce((s, p) => s + (+p.amount || 0), 0));
+    const estimate = round2(wealth * (+S.rate || 2.5) / 100);
+    return { S, z, owner, nisab, wealth, cashNow, metals, recv, debt, start, due, reached, hawlDone, amountDue, paid, remaining: Math.max(0, round2(amountDue - paid)), estimate, daysLeft: due ? daysBetween(today, due) : null, missing: [...missing] };
+}
+
+/* ---------- الواجهة العامة ---------- */
+let INH = { tab: 'zakat', open: {} };
+function inhTab(t) { INH.tab = t; renderInherit(); }
+function renderInherit() {
+    const box = $('inherit-body'); if (!box) return;
+    if (!inhAllowed()) { box.innerHTML = '<div class="card p-6 text-center text-slate-500">هذه اللوحة للمدير أو لمن مُنح صلاحيتها.</div>'; return; }
+    const tabBtn = (id, lab) => `<button class="hist-tab ${INH.tab === id ? 'active' : ''}" onclick="inhTab('${id}')">${lab}</button>`;
+    box.innerHTML = `<div class="flex gap-2 flex-wrap">${tabBtn('zakat', '🕌 زكاة المال')}${tabBtn('estate', '📜 المواريث والتركات')}</div><div id="inh-content" class="space-y-5"></div>`;
+    if (INH.tab === 'zakat') renderZakat(); else renderEstates();
+}
+
+/* ---------- نوافذ ديناميكية ---------- */
+function dynModal(title, html, okLabel, onOk, wide) {
+    closeDyn(); const w = document.createElement('div'); w.id = 'dyn-modal'; w.className = 'fixed inset-0 modal-bg z-50 flex items-center justify-center p-4';
+    w.innerHTML = `<div class="card ${wide ? 'max-w-3xl' : 'max-w-md'} w-full max-h-[92vh] overflow-y-auto p-6 space-y-4"><div class="flex justify-between items-center"><h3 class="text-lg font-black text-slate-800">${title}</h3><button class="btn-secondary text-xs" onclick="closeDyn()">✖</button></div><div class="space-y-3">${html}</div>${onOk ? `<div class="flex gap-2"><button id="dyn-ok" class="btn-primary flex-1 py-2.5 text-sm">${okLabel || 'حفظ'}</button><button class="btn-secondary text-sm" onclick="closeDyn()">إلغاء</button></div>` : ''}</div>`;
+    document.body.appendChild(w); if (onOk) $('dyn-ok').onclick = () => { try { if (onOk() !== false) { closeDyn(); try { const s = $('sec-inherit'); if (s && !s.classList.contains('hidden')) renderInherit(); } catch (e) { } } } catch (e) { console.error(e); toast('تعذّر التنفيذ: ' + e.message, 'err'); } };
+}
+function closeDyn() { const w = $('dyn-modal'); if (w) w.remove(); }
+const fld = (id, lab, inner) => `<div><label class="block mb-1 text-xs font-bold text-slate-700">${lab}</label>${inner}</div>`;
+const optList = (arr, sel) => arr.map(a => `<option value="${esc(a)}" ${a === sel ? 'selected' : ''}>${esc(a)}</option>`).join('');
+const accNames = () => appData.accounts.map(a => a.name);
+function ensureCat(c) { if (!appData.categories.includes(c)) appData.categories.push(c); }
+function mkTx(o) { const t = Object.assign({ id: uid(), equivalentCurrencies: {}, date: todayStr(), submittedBy: currentUser, bucket: 'مصاريف' }, o); if (t.account && !t.accountId) t.accountId = (getAcc(t.account) || {}).id; appData.transactions.push(t); return t; }
+
+/* ---------- إعدادات الزكاة (في شاشة الإعدادات) ---------- */
+function renderZakatSettings() {
+    const box = $('zakat-settings-body'); if (!box) return; const S = zkSet();
+    box.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      ${fld('zs-rule', 'سقوط الحول إذا نقص المال عن النصاب خلال العام', `<select id="zs-rule" class="input-field text-sm" onchange="zkSaveSettings()"><option value="break" ${S.hawlRule === 'break' ? 'selected' : ''}>ينقطع الحول ويبدأ من جديد (قول الجمهور)</option><option value="ends" ${S.hawlRule === 'ends' ? 'selected' : ''}>يكفي النصاب في طرفي الحول (الحنفية)</option></select>`)}
+      ${fld('zs-base', 'أساس النصاب', `<select id="zs-base" class="input-field text-sm" onchange="zkSaveSettings()"><option value="silver" ${S.nisabBase === 'silver' ? 'selected' : ''}>الفضة (595 جراماً) — الأحوط</option><option value="gold" ${S.nisabBase === 'gold' ? 'selected' : ''}>الذهب (85 جراماً)</option></select>`)}
+      ${fld('zs-cur', 'عملة حساب الزكاة', `<select id="zs-cur" class="input-field text-sm" onchange="zkSaveSettings()">${optList(appData.currencies, S.cur)}</select>`)}
+      ${fld('zs-rate', 'نسبة الإخراج %', `<input id="zs-rate" type="number" step="0.01" class="input-field text-sm" value="${S.rate}" onchange="zkSaveSettings()">`)}
+      ${fld('zs-gold', 'سعر جرام الذهب عيار 24 (بعملة الزكاة)', `<input id="zs-gold" type="number" step="0.01" class="input-field text-sm" value="${S.gold24 || ''}" onchange="zkSaveSettings()">`)}
+      ${fld('zs-silver', 'سعر جرام الفضة (بعملة الزكاة)', `<input id="zs-silver" type="number" step="0.01" class="input-field text-sm" value="${S.silver || ''}" onchange="zkSaveSettings()">`)}
+    </div>
+    <label class="flex items-center gap-2 text-xs font-bold"><input type="checkbox" id="zs-debt" ${S.deductDebts ? 'checked' : ''} onchange="zkSaveSettings()"> خصم الديون الحالّة عليّ من وعاء الزكاة</label>
+    <label class="flex items-center gap-2 text-xs font-bold"><input type="checkbox" id="zs-recv" ${S.addReceivables ? 'checked' : ''} onchange="zkSaveSettings()"> إضافة الديون المرجوّ سدادها لي</label>
+    <p class="eq-hint">أدخل أسعار الذهب والفضة يدوياً وحدّثها دورياً. هذه أداة حساب مساعِدة وليست فتوى، فراجع أهل العلم في المسائل الخلافية.</p>`;
+}
+function zkSaveSettings() {
+    const S = zkSet(); S.hawlRule = $('zs-rule').value; S.nisabBase = $('zs-base').value; S.cur = $('zs-cur').value; S.rate = parseFloat($('zs-rate').value) || 2.5;
+    S.gold24 = parseFloat($('zs-gold').value) || 0; S.silver = parseFloat($('zs-silver').value) || 0; S.deductDebts = $('zs-debt').checked; S.addReceivables = $('zs-recv').checked;
+    saveData(); toast('حُفظت إعدادات الزكاة', 'ok', 2000);
+}
+
+/* ---------- تبويب زكاة المال ---------- */
+function renderZakat() {
+    const box = $('inh-content'), S = zkSet(), D = zkData(), nis = zkNisab(S);
+    let h = `<div class="card p-5 space-y-2"><div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-base font-black text-slate-800">⚖️ النصاب والأسعار</h3><span class="text-xs text-slate-500">الإعدادات الكاملة في شاشة الإعدادات ← إعدادات الزكاة</span></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+        ${fld('zk-gold', `سعر جرام الذهب 24 (${esc(S.cur)})`, `<input id="zk-gold" type="number" step="0.01" class="input-field text-sm" value="${S.gold24 || ''}" onchange="zkQuickPrice()">`)}
+        ${fld('zk-silver', `سعر جرام الفضة (${esc(S.cur)})`, `<input id="zk-silver" type="number" step="0.01" class="input-field text-sm" value="${S.silver || ''}" onchange="zkQuickPrice()">`)}
+        <div class="bg-teal-50 rounded-2xl p-3 text-center"><div class="text-[11px] text-slate-500 font-bold">النصاب (${S.nisabBase === 'gold' ? '85غ ذهب' : '595غ فضة'})</div><div class="text-lg font-black text-teal-800">${nis == null ? 'أدخل السعر' : fmt(nis) + ' ' + esc(S.cur)}</div></div></div>
+      <p class="eq-hint">الحول: ${S.hawlRule === 'ends' ? 'يكفي النصاب في طرفي الحول' : 'ينقطع إن نقص عن النصاب'} · النسبة ${S.rate}% · ${S.deductDebts ? 'تُخصم الديون الحالّة' : 'لا تُخصم الديون'}</p></div>`;
+    const shownOwners = zkShown();
+    h += `<div class="card p-3 flex flex-wrap items-center gap-2 text-sm"><b>👤 عرض حساب:</b><select class="input-field text-xs w-52" onchange="zkSel(this.value)">${isMain() ? `<option value="__all" ${INH.zkSel === '__all' ? 'selected' : ''}>كل الحسابات (${zkOwners().length})</option>` : ''}${zkChoices().map(n => `<option value="${esc(n)}" ${shownOwners.length === 1 && shownOwners[0] === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>`;
+    h += `<div class="space-y-3">` + shownOwners.map(o => {
+        const m = zkModel(o), st = m.nisab == null ? ['أدخل سعر الذهب/الفضة لتحديد النصاب', 'bg-slate-100 text-slate-700'] : !m.reached ? ['لم يبلغ النصاب', 'bg-slate-100 text-slate-700'] : m.hawlDone ? (m.remaining <= 0.005 && m.amountDue > 0 ? ['أُخرجت الزكاة ✔', 'bg-emerald-100 text-emerald-800'] : ['حال الحول — الزكاة واجبة', 'bg-rose-100 text-rose-700']) : [`الحول جارٍ — بقي ${m.daysLeft} يوماً`, 'bg-amber-100 text-amber-800'];
+        return `<div class="card p-5 space-y-3"><div class="flex flex-wrap items-center justify-between gap-2"><b class="text-base">👤 ${esc(o)}</b><span class="badge ${st[1]}">${st[0]}</span></div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center text-sm">
+            <div class="bg-slate-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">نقد وأرصدة</div><b>${fmt(m.cashNow)}</b></div>
+            <div class="bg-slate-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">ذهب وفضة</div><b>${fmt(m.metals)}</b></div>
+            <div class="bg-slate-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">ديون لي / عليّ</div><b>${fmt(m.recv)} / ${fmt(m.debt)}</b></div>
+            <div class="bg-teal-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">وعاء الزكاة (${esc(m.z)})</div><b class="text-teal-800">${fmt(m.wealth)}</b></div></div>
+          <div class="text-xs text-slate-600 space-y-0.5">${m.start ? `<div>بداية الحول: <b>${esc(m.start === '1900-01-01' ? 'من البداية' : m.start)}</b> ${m.start !== '1900-01-01' ? '(' + esc(hijriFmt(m.start)) + ')' : ''}${D.override[o] ? ' — يدوي' : ''}</div><div>حلول الحول: <b>${esc(m.due)}</b> (${esc(hijriFmt(m.due))})</div>` : '<div>لا يوجد حول جارٍ حالياً.</div>'}
+            ${m.hawlDone ? `<div class="text-sm">المستحق: <b class="text-rose-700">${fmt(m.amountDue)} ${esc(m.z)}</b> · المُخرَج: <b>${fmt(m.paid)}</b> · المتبقي: <b>${fmt(m.remaining)}</b></div>` : `<div>لو حال الحول الآن: <b>${fmt(m.estimate)} ${esc(m.z)}</b></div>`}
+            ${m.missing.length ? `<div class="text-amber-700">⚠️ لم تُحتسب عملات بلا سعر صرف: ${m.missing.map(esc).join('، ')}</div>` : ''}</div>
+          <div class="flex flex-wrap gap-2"><button class="btn-primary text-xs px-4 py-2" onclick="zkPayModal('${esc(o)}')">💸 إخراج الزكاة</button>
+            <button class="btn-secondary text-xs px-3 py-2" onclick="zkOverrideModal('${esc(o)}')">📅 ضبط بداية الحول يدوياً</button></div></div>`;
+    }).join('') + `</div>`;
+    h += `<div class="card p-5 space-y-3"><h3 class="text-base font-black text-slate-800">🥇 الذهب والفضة المملوكة</h3>
+      <div class="grid grid-cols-2 lg:grid-cols-6 gap-2 items-end">
+        ${fld('zg-owner', 'المالك', `<select id="zg-owner" class="input-field text-xs">${optList(zkOwners())}</select>`)}
+        ${fld('zg-type', 'النوع', `<select id="zg-type" class="input-field text-xs"><option value="gold">ذهب</option><option value="silver">فضة</option></select>`)}
+        ${fld('zg-desc', 'الوصف', `<input id="zg-desc" class="input-field text-xs" placeholder="سوار، خاتم...">`)}
+        ${fld('zg-w', 'الوزن (غرام)', `<input id="zg-w" type="number" step="0.01" class="input-field text-xs">`)}
+        ${fld('zg-k', 'العيار', `<select id="zg-k" class="input-field text-xs"><option>24</option><option>22</option><option selected>21</option><option>18</option><option>14</option></select>`)}
+        ${fld('zg-acq', 'تاريخ الامتلاك (اختياري)', `<input id="zg-acq" type="date" class="input-field text-xs">`)}</div>
+      <button class="btn-primary text-xs px-4 py-2" onclick="zkAddGold()">＋ إضافة</button>
+      <div class="divide-y text-sm">${D.gold.length ? D.gold.map(g => `<div class="py-2 flex justify-between items-center gap-2"><span>${g.type === 'silver' ? '🥈' : '🥇'} <b>${esc(g.desc || (g.type === 'silver' ? 'فضة' : 'ذهب'))}</b> · ${esc(g.owner)} · ${g.weight}غ ${g.type === 'silver' ? '' : 'عيار ' + g.karat} · <span class="text-slate-500">${fmt(zkMetalValue(g, S))} ${esc(S.cur)}</span></span><button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg text-xs font-bold" onclick="zkDelGold('${g.id}')">🗑️</button></div>`).join('') : '<div class="text-slate-400 text-center py-3 text-xs">لا توجد مقتنيات مسجّلة</div>'}</div></div>`;
+    h += `<div class="card p-5 space-y-2"><h3 class="text-base font-black text-slate-800">📒 سجل الزكاة المُخرَجة</h3><div class="divide-y text-sm">${D.paid.length ? [...D.paid].reverse().map(p => `<div class="py-2 flex justify-between gap-2"><span>${esc(p.date)} · <b>${esc(p.owner)}</b> · ${esc(p.note || '')}</span><b>${fmt(p.amount)} ${esc(p.cur)}</b></div>`).join('') : '<div class="text-slate-400 text-center py-3 text-xs">لم تُسجَّل زكاة بعد</div>'}</div></div>`;
+    box.innerHTML = h;
+}
+function zkQuickPrice() { const S = zkSet(); S.gold24 = parseFloat($('zk-gold').value) || 0; S.silver = parseFloat($('zk-silver').value) || 0; saveData(); }
+function zkAddGold() {
+    const w = parseFloat($('zg-w').value); if (!(w > 0)) { toast('أدخل الوزن', 'err'); return; }
+    zkData().gold.push({ id: 'g' + uid(), owner: $('zg-owner').value, type: $('zg-type').value, desc: $('zg-desc').value.trim(), weight: w, karat: +$('zg-k').value, acq: $('zg-acq').value || '' }); saveData(); toast('أُضيف', 'ok', 1500);
+}
+function zkDelGold(id) { if (!confirm('حذف هذا المقتنى؟')) return; const D = zkData(); D.gold = D.gold.filter(g => g.id !== id); saveData(); }
+function zkOverrideModal(o) {
+    const D = zkData(); dynModal('📅 بداية الحول — ' + esc(o), `<p class="eq-hint">يحسب البرنامج بداية الحول من حركاتك. إن كان عندك تاريخ مختلف (لأن الحركات لا تغطي كل الفترة) أدخله هنا. اترك الخانة فارغة للعودة للحساب التلقائي.</p>${fld('zo-d', 'تاريخ بداية الحول', `<input id="zo-d" type="date" class="input-field" value="${esc(D.override[o] || '')}">`)}`, 'حفظ', () => { const v = $('zo-d').value; if (v) D.override[o] = v; else delete D.override[o]; saveData(); });
+}
+function zkPayModal(o) {
+    const m = zkModel(o), def = m.hawlDone ? m.remaining : m.estimate;
+    dynModal('💸 إخراج زكاة — ' + esc(o), `<p class="eq-hint">يُسجَّل كحركة «صرف» بتصنيف «زكاة» من الحساب الذي تختاره، وتُدوَّن في سجل الزكاة${m.hawlDone ? '' : '. تنبيه: الحول لم يحلّ بعد (تعجيل الزكاة)'}.</p>
+      ${fld('zp-amt', `المبلغ (${esc(m.z)})`, `<input id="zp-amt" type="number" step="0.01" class="input-field" value="${def || ''}">`)}
+      ${fld('zp-acc', 'من حساب', `<select id="zp-acc" class="input-field">${optList(accNames())}</select>`)}
+      ${fld('zp-date', 'التاريخ', `<input id="zp-date" type="date" class="input-field" value="${todayStr()}">`)}
+      ${fld('zp-note', 'المستحقون / ملاحظة', `<input id="zp-note" class="input-field" placeholder="مثال: لأسرة فقيرة، لمؤسسة...">`)}`, 'تسجيل الإخراج', () => {
+        const amt = parseFloat($('zp-amt').value); if (!(amt > 0)) { toast('أدخل مبلغاً', 'err'); return false; }
+        ensureCat('زكاة'); const acc = $('zp-acc').value, date = $('zp-date').value || todayStr(), note = $('zp-note').value.trim();
+        const t = mkTx({ type: 'صرف', amount: amt, currency: m.z, account: acc, owner: o, date, category: 'زكاة', party: 'زكاة المال', notes: note, tags: ['زكاة'] });
+        const D = zkData(); D.paid.push({ id: 'p' + uid(), owner: o, date, amount: amt, cur: m.z, note, hawlDue: m.due, txId: t.id });
+        const tot = round2(D.paid.filter(p => p.owner === o && p.hawlDue === m.due).reduce((s, p) => s + p.amount, 0));
+        if (m.hawlDone && tot >= m.amountDue - 0.01) { D.cycle[o] = { from: m.due }; delete D.override[o]; }
+        saveData(); toast('سُجّلت الزكاة', 'ok');
+    });
+}
+
+/* ---------- تبويب المواريث والتركات ---------- */
+const E_LIAB = ['دين على المتوفى', 'تجهيز ودفن', 'وصية'];
+const estOf = id => estData().find(e => e.id === id);
+function estLiquid(e) { const out = {}; appData.accounts.forEach(a => appData.currencies.forEach(c => { const b = getBalance(e.deceased, a.name, c); if (Math.abs(b) > 0.004) (out[c] = out[c] || []).push({ acc: a.name, bal: b }); })); return out; }
+function estCalc(e, cur) {
+    const liq = round2((estLiquid(e)[cur] || []).reduce((s, x) => s + x.bal, 0));
+    const unpaid = round2((e.liabs || []).filter(l => !l.paid && l.cur === cur).reduce((s, l) => s + (+l.amount || 0), 0));
+    const distributed = round2((e.dist || []).filter(d => d.cur === cur).reduce((s, d) => s + d.total, 0));
+    const base = round2(liq + distributed - unpaid), avail = round2(Math.max(0, liq - unpaid));
+    const sum = (e.heirs || []).reduce((s, h) => s + (+h.share || 0), 0);
+    const rows = (e.heirs || []).map(h => { const ent = round2(base * (+h.share || 0)), rec = round2((e.dist || []).filter(d => d.cur === cur).reduce((s, d) => s + ((d.items.find(i => i.heirId === h.id) || {}).amount || 0), 0)); return { h, ent, rec, left: round2(ent - rec) }; });
+    return { liq, unpaid, distributed, base, avail, sum, rows };
+}
+function renderEstates() {
+    const box = $('inh-content'), list = estData();
+    let h = `<div class="flex justify-between items-center"><p class="eq-hint">أدخل أنصبة الورثة المعتمدة من المحكمة (كسر عشري مجموعه 1). التوزيع يُنشئ تحويلات حقيقية من حسابات المتوفى إلى حسابات الورثة.</p><button class="btn-primary text-sm px-4 py-2 shrink-0" onclick="estNewModal()">＋ تركة جديدة</button></div>`;
+    h += list.length ? list.map(e => estCard(e)).join('') : '<div class="card p-8 text-center text-slate-400">لا توجد تركات. أنشئ تركة باختيار حساب المتوفى.</div>';
+    box.innerHTML = h;
+}
+function estCard(e) {
+    const open = INH.open[e.id], curs = Object.keys(estLiquid(e)); const cur = e.view || curs[0] || appData.currencies[0];
+    const C = estCalc(e, cur), pcts = v => (v * 100).toFixed(4).replace(/\.?0+$/, '') + '%';
+    let h = `<div class="card p-5 space-y-3"><div class="flex flex-wrap items-center justify-between gap-2 cursor-pointer" onclick="estToggle('${e.id}')"><div><b class="text-base">📜 تركة ${esc(e.deceased)}</b> <span class="text-xs text-slate-500">· توفي ${esc(e.deathDate || '—')} ${e.deathDate ? '(' + esc(hijriFmt(e.deathDate)) + ')' : ''}${e.court ? ' · ' + esc(e.court) : ''}</span></div><span class="text-slate-500 text-sm">${open ? '▲' : '▼'}</span></div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center text-sm"><div class="bg-slate-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">السيولة في حسابات المتوفى (${esc(cur)})</div><b>${fmt(C.liq)}</b></div><div class="bg-slate-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">التزامات غير مسدّدة</div><b class="text-rose-700">${fmt(C.unpaid)}</b></div><div class="bg-teal-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">صافي التركة</div><b class="text-teal-800">${fmt(C.base)}</b></div><div class="bg-emerald-50 rounded-xl p-2"><div class="text-[11px] text-slate-500 font-bold">المتاح للتوزيع</div><b class="text-emerald-800">${fmt(C.avail)}</b></div></div>`;
+    if (open) {
+        h += `<div class="flex flex-wrap gap-2 items-center"><span class="text-xs font-bold">العملة:</span><select class="input-field text-xs w-32" onchange="estView('${e.id}',this.value)">${optList(appData.currencies, cur)}</select>
+          <button class="btn-secondary text-xs px-3 py-2" onclick="estNewModal('${e.id}')">✏️ بيانات التركة</button><button class="btn-secondary text-xs px-3 py-2" onclick="estReport('${e.id}')">📋 كشف التركة</button><button class="px-3 py-2 bg-rose-50 text-rose-700 rounded-xl text-xs font-bold" onclick="estDelete('${e.id}')">🗑️ حذف التركة</button></div>`;
+        // الورثة
+        h += `<div class="border rounded-2xl p-3 space-y-2"><div class="flex justify-between items-center"><b class="text-sm">👪 الورثة والأنصبة</b><button class="btn-primary text-xs px-3 py-1.5" onclick="estHeirModal('${e.id}')">＋ وارث</button></div>
+          <div class="text-xs ${Math.abs(C.sum - 1) < 1e-6 ? 'text-emerald-700' : 'text-rose-700'} font-bold">مجموع الأنصبة: ${C.sum.toFixed(6)} (${pcts(C.sum)}) ${Math.abs(C.sum - 1) < 1e-6 ? '✔ مكتمل' : '⚠️ يجب أن يساوي 1'}</div>
+          <div class="overflow-x-auto"><table class="text-xs"><thead><tr><th>الوارث</th><th>القرابة</th><th>النصيب</th><th>الحساب</th><th>يستحق</th><th>استلم</th><th>المتبقي</th><th></th></tr></thead><tbody>${C.rows.map(r => `<tr><td><b>${esc(r.h.owner)}</b>${r.h.minor ? ' <span class="badge bg-amber-100 text-amber-800">قاصر</span>' : ''}${r.h.minor && r.h.guardian ? `<div class="text-[10px] text-slate-500">الوصي: ${esc(r.h.guardian)}</div>` : ''}</td><td>${esc(r.h.relation || '')}</td><td>${(+r.h.share).toFixed(6)}<div class="text-[10px] text-slate-500">${pcts(+r.h.share)}</div></td><td>${esc(r.h.account || '')}</td><td>${fmt(r.ent)}</td><td>${fmt(r.rec)}</td><td><b>${fmt(r.left)}</b></td><td class="whitespace-nowrap"><button onclick="estHeirModal('${e.id}','${r.h.id}')" class="px-2 py-1 bg-slate-100 rounded-lg">✏️</button> <button onclick="estHeirDel('${e.id}','${r.h.id}')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg">🗑️</button></td></tr>`).join('') || '<tr><td colspan="8" class="text-center text-slate-400 py-3">أضف الورثة</td></tr>'}</tbody></table></div></div>`;
+        // الأصول
+        const liq = estLiquid(e);
+        h += `<div class="border rounded-2xl p-3 space-y-2"><div class="flex justify-between items-center"><b class="text-sm">💰 الأصول</b><div class="flex gap-2"><button class="btn-secondary text-xs px-3 py-1.5" onclick="estIncomeModal('${e.id}')">＋ وارد للتركة (معاش/راتب/تأمين)</button><button class="btn-secondary text-xs px-3 py-1.5" onclick="estAssetModal('${e.id}')">＋ أصل مستحق</button></div></div>
+          <div class="text-xs space-y-1">${Object.keys(liq).length ? Object.entries(liq).map(([c, arr]) => `<div>🏦 <b>${esc(c)}</b>: ${arr.map(x => `${esc(x.acc)} ${fmt(x.bal)}`).join(' · ')}</div>`).join('') : '<div class="text-slate-400">لا أرصدة في حسابات المتوفى</div>'}</div>
+          ${(e.assets || []).map(a => `<div class="flex justify-between items-center text-xs bg-slate-50 rounded-xl px-3 py-2"><span>${a.received ? '✅' : '⏳'} ${esc(a.kind)} — ${esc(a.desc || '')}: <b>${fmt(a.amount)} ${esc(a.cur)}</b></span><span class="flex gap-1">${a.received ? `<span class="text-emerald-700 font-bold">استُلم${assetDate(a) ? ' · ' + esc(assetDate(a)) : ''}</span>` : `<button class="btn-primary text-[11px] px-2 py-1" onclick="estReceive('${e.id}','${a.id}')">استلام</button>`}<button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg" onclick="estAssetDel('${e.id}','${a.id}')">🗑️</button></span></div>`).join('')}${incomeLogHtml(e)}</div>`;
+        // الالتزامات
+        const net = C.base, wasiy = (e.liabs || []).filter(l => l.kind === 'وصية' && l.cur === cur).reduce((s, l) => s + (+l.amount || 0), 0);
+        h += `<div class="border rounded-2xl p-3 space-y-2"><div class="flex justify-between items-center"><b class="text-sm">📌 الالتزامات (ديون، تجهيز ودفن، وصية)</b><button class="btn-secondary text-xs px-3 py-1.5" onclick="estLiabModal('${e.id}')">＋ التزام</button></div>
+          ${wasiy > 0 && C.base > 0 && wasiy > C.base / 3 + 0.01 ? `<div class="text-xs text-amber-700 font-bold">⚠️ الوصية (${fmt(wasiy)}) تتجاوز ثلث صافي التركة (${fmt(C.base / 3)}) — لا تنفذ الزيادة إلا بإجازة الورثة.</div>` : ''}
+          ${(e.liabs || []).map(l => `<div class="flex justify-between items-center text-xs bg-slate-50 rounded-xl px-3 py-2"><span>${l.paid ? '✅' : '⏳'} ${esc(l.kind)} — ${esc(l.desc || '')}: <b>${fmt(l.amount)} ${esc(l.cur)}</b></span><span class="flex gap-1">${l.paid ? '<span class="text-emerald-700 font-bold">سُدّد</span>' : `<button class="btn-primary text-[11px] px-2 py-1" onclick="estPayLiab('${e.id}','${l.id}')">تسديد</button>`}<button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg" onclick="estLiabDel('${e.id}','${l.id}')">🗑️</button></span></div>`).join('') || '<div class="text-xs text-slate-400">لا التزامات</div>'}</div>`;
+        // صدقات
+        h += `<div class="border rounded-2xl p-3 space-y-2"><div class="flex justify-between items-center"><b class="text-sm">🤲 صدقات وزكاة من التركة</b><button class="btn-secondary text-xs px-3 py-1.5" onclick="estCharityModal('${e.id}')">＋ إخراج صدقة/زكاة</button></div>
+          ${(e.charity || []).map(c => `<div class="text-xs bg-slate-50 rounded-xl px-3 py-2 flex justify-between"><span>${esc(c.date)} · ${esc(c.kind)} ${esc(c.note || '')}</span><span class="flex items-center gap-1"><b>${fmt(c.amount)} ${esc(c.cur)}${C.base > 0 && c.cur === cur ? ' (' + (c.amount / (C.base + (e.charity || []).filter(x => x.cur === cur).reduce((s, x) => s + x.amount, 0)) * 100).toFixed(2) + '% من الأصل)' : ''}</b><button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg" title="حذف واسترداد المبلغ" onclick="estCharityDel('${e.id}','${c.id}')">🗑️ استرداد</button></span></div>`).join('') || '<div class="text-xs text-slate-400">لا صدقات مسجّلة</div>'}</div>`;
+        // التوزيع
+        h += `<div class="border-2 border-emerald-300 rounded-2xl p-3 space-y-2"><b class="text-sm">📤 توزيع على الورثة</b><div class="text-xs text-slate-600">المتاح للتوزيع الآن: <b>${fmt(C.avail)} ${esc(cur)}</b></div><button class="btn-primary text-sm px-4 py-2" onclick="estDistModal('${e.id}','${esc(cur)}')">📤 توزيع…</button>
+          ${(e.dist || []).length ? `<details class="text-xs"><summary class="cursor-pointer font-bold">سجل التوزيعات (${e.dist.length})</summary>${[...e.dist].reverse().map(d => `<div class="py-1 border-b">${esc(d.date)} · ${fmt(d.total)} ${esc(d.cur)} من «${esc(d.account)}»: ${d.items.map(i => esc(i.heir) + ' ' + fmt(i.amount)).join(' · ')}</div>`).join('')}</details>` : ''}</div>`;
+    }
+    return h + '</div>';
+}
+function estToggle(id) { INH.open[id] = !INH.open[id]; renderInherit(); }
+function estView(id, c) { estOf(id).view = c; renderInherit(); }
+
+/* --- إنشاء/تعديل التركة --- */
+function estNewModal(id) {
+    const e = id ? estOf(id) : null;
+    dynModal(e ? '✏️ بيانات التركة' : '📜 تركة جديدة', `${fld('en-dec', 'المتوفى (حساب موجود في البرنامج)', `<select id="en-dec" class="input-field" ${e ? 'disabled' : ''}>${optList(zkOwners(), e && e.deceased)}</select>`)}
+      ${fld('en-date', 'تاريخ الوفاة', `<input id="en-date" type="date" class="input-field" value="${esc(e ? e.deathDate || '' : '')}">`)}
+      ${fld('en-court', 'بيانات حصر الإرث / قرار المحكمة', `<input id="en-court" class="input-field" placeholder="رقم القرار وتاريخه والمحكمة" value="${esc(e ? e.court || '' : '')}">`)}
+      ${fld('en-note', 'ملاحظات', `<input id="en-note" class="input-field" value="${esc(e ? e.note || '' : '')}">`)}`, 'حفظ', () => {
+        if (e) { e.deathDate = $('en-date').value; e.court = $('en-court').value.trim(); e.note = $('en-note').value.trim(); }
+        else { const n = { id: 'e' + uid(), deceased: $('en-dec').value, deathDate: $('en-date').value, court: $('en-court').value.trim(), note: $('en-note').value.trim(), heirs: [], assets: [], liabs: [], charity: [], dist: [] }; estData().push(n); INH.open[n.id] = true; }
+        saveData(); });
+}
+function estDelete(id) { const e = estOf(id); if (!confirm('حذف سجل التركة؟ (حركات التوزيع المسجلة تبقى في السجل المالي ولا تُحذف)')) return; appData.estates = estData().filter(x => x.id !== id); saveData(); }
+/* --- الورثة --- */
+function estHeirModal(id, hid) {
+    const e = estOf(id), h = hid ? e.heirs.find(x => x.id === hid) : null;
+    dynModal(h ? '✏️ وارث' : '👪 وارث جديد', `${fld('eh-o', 'الوارث (حساب في البرنامج)', `<select id="eh-o" class="input-field">${optList(zkOwners().filter(n => n !== e.deceased), h && h.owner)}</select>`)}
+      ${fld('eh-rel', 'صلة القرابة', `<input id="eh-rel" class="input-field" placeholder="ابن، بنت، زوجة، حفيد..." value="${esc(h ? h.relation || '' : '')}">`)}
+      ${fld('eh-sh', 'النصيب المعتمد (كسر عشري مثل 0.123525)', `<input id="eh-sh" type="number" step="0.000001" class="input-field" value="${h ? h.share : ''}">`)}
+      ${fld('eh-acc', 'حساب الاستلام', `<select id="eh-acc" class="input-field">${optList(accNames(), h && h.account)}</select>`)}
+      <label class="flex items-center gap-2 text-xs font-bold"><input type="checkbox" id="eh-min" ${h && h.minor ? 'checked' : ''}> قاصر</label>
+      ${fld('eh-gu', 'الوصي / الولي (للقاصر)', `<input id="eh-gu" class="input-field" value="${esc(h ? h.guardian || '' : '')}">`)}
+      ${fld('eh-rep', 'ينوب عنه في تصفح حسابه (اسم نائبه، اختياري — لمن لا يدخل البرنامج بنفسه)', `<input id="eh-rep" class="input-field" placeholder="مثال: ولاء كحيل" value="${esc(h ? h.repr || '' : '')}">`)}`, 'حفظ', () => {
+        const sh = parseFloat($('eh-sh').value); if (!(sh > 0 && sh <= 1)) { toast('النصيب كسر عشري بين 0 و1', 'err'); return false; }
+        const o = { id: h ? h.id : 'h' + uid(), owner: $('eh-o').value, relation: $('eh-rel').value.trim(), share: sh, account: $('eh-acc').value, minor: $('eh-min').checked, guardian: $('eh-gu').value.trim(), repr: $('eh-rep').value.trim() };
+        if (!h && e.heirs.some(x => x.owner === o.owner)) { toast('هذا الوارث مضاف مسبقاً', 'err'); return false; }
+        if (h) Object.assign(h, o); else e.heirs.push(o); saveData(); });
+}
+function estHeirDel(id, hid) { const e = estOf(id); if ((e.dist || []).some(d => d.items.some(i => i.heirId === hid)) && !confirm('هذا الوارث استلم توزيعات سابقة. حذفه من الكشف لا يحذف الحركات. متابعة؟')) return; else if (!confirm('حذف الوارث؟')) return; e.heirs = e.heirs.filter(h => h.id !== hid); saveData(); }
+/* --- الأصول --- */
+function estIncomeModal(id) {
+    const e = estOf(id); dynModal('＋ وارد للتركة', `<p class="eq-hint">يُسجَّل كإيداع في حساب المتوفى (معاش، راتب مستحق، تعويض، تأمين...) ثم تُوزّعه على الورثة.</p>
+      ${fld('ei-k', 'النوع', `<select id="ei-k" class="input-field"><option>معاش</option><option>راتب</option><option>تأمين</option><option>تعويض</option><option>أخرى</option></select>`)}
+      ${fld('ei-a', 'المبلغ', `<input id="ei-a" type="number" step="0.01" class="input-field">`)}${fld('ei-c', 'العملة', `<select id="ei-c" class="input-field">${optList(appData.currencies, zkSet().cur)}</select>`)}
+      ${fld('ei-acc', 'إلى حساب المتوفى', `<select id="ei-acc" class="input-field">${optList(accNames())}</select>`)}${fld('ei-d', 'التاريخ', `<input id="ei-d" type="date" class="input-field" value="${todayStr()}">`)}`, 'تسجيل', () => {
+        const a = parseFloat($('ei-a').value); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        mkTx({ type: 'إيداع', amount: a, currency: $('ei-c').value, account: $('ei-acc').value, owner: e.deceased, date: $('ei-d').value || todayStr(), party: 'وارد تركة: ' + $('ei-k').value, notes: 'تركة ' + e.deceased, tags: ['تركة'] }); saveData(); });
+}
+function estAssetModal(id) {
+    const e = estOf(id); dynModal('＋ أصل مستحق للتركة', `<p class="eq-hint">أصل لم يُقبض بعد (تأمين مستحق، معاش متأخر، دين للمتوفى عند الناس...). عند قبضه اضغط «استلام» فيدخل حسابات المتوفى.</p>
+      ${fld('ea-k', 'النوع', `<select id="ea-k" class="input-field"><option>تأمين</option><option>معاش مستحق</option><option>راتب مستحق</option><option>دين للمتوفى</option><option>أخرى</option></select>`)}${fld('ea-d', 'الوصف', `<input id="ea-d" class="input-field">`)}
+      ${fld('ea-a', 'المبلغ', `<input id="ea-a" type="number" step="0.01" class="input-field">`)}${fld('ea-c', 'العملة', `<select id="ea-c" class="input-field">${optList(appData.currencies, zkSet().cur)}</select>`)}`, 'إضافة', () => {
+        const a = parseFloat($('ea-a').value); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        e.assets.push({ id: 'a' + uid(), kind: $('ea-k').value, desc: $('ea-d').value.trim(), amount: a, cur: $('ea-c').value, received: false }); saveData(); });
+}
+function estReceive(id, aid) {
+    const e = estOf(id), a = e.assets.find(x => x.id === aid);
+    dynModal('استلام أصل', `<p class="text-sm">${esc(a.kind)} — ${esc(a.desc || '')}: <b>${fmt(a.amount)} ${esc(a.cur)}</b></p>${fld('er-acc', 'إيداع في حساب المتوفى', `<select id="er-acc" class="input-field">${optList(accNames())}</select>`)}${fld('er-d', 'تاريخ الاستلام', `<input id="er-d" type="date" class="input-field" value="${todayStr()}">`)}`, 'تأكيد الاستلام', () => {
+        const rd = $('er-d').value || todayStr(), t = mkTx({ type: 'إيداع', amount: a.amount, currency: a.cur, account: $('er-acc').value, owner: e.deceased, date: rd, party: 'تركة: ' + a.kind, notes: a.desc || '', tags: ['تركة'] }); a.received = true; a.receivedDate = rd; a.txId = t.id; saveData(); });
+}
+function estAssetDel(id, aid) { if (!confirm('حذف الأصل من القائمة؟')) return; const e = estOf(id); e.assets = e.assets.filter(a => a.id !== aid); saveData(); }
+/* --- الالتزامات --- */
+function estLiabModal(id) {
+    const e = estOf(id); dynModal('＋ التزام على التركة', `${fld('el-k', 'النوع', `<select id="el-k" class="input-field">${optList(E_LIAB)}</select>`)}${fld('el-d', 'الوصف / الجهة', `<input id="el-d" class="input-field">`)}
+      ${fld('el-a', 'المبلغ', `<input id="el-a" type="number" step="0.01" class="input-field">`)}${fld('el-c', 'العملة', `<select id="el-c" class="input-field">${optList(appData.currencies, zkSet().cur)}</select>`)}`, 'إضافة', () => {
+        const a = parseFloat($('el-a').value); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        e.liabs.push({ id: 'l' + uid(), kind: $('el-k').value, desc: $('el-d').value.trim(), amount: a, cur: $('el-c').value, paid: false }); saveData(); });
+}
+function estPayLiab(id, lid) {
+    const e = estOf(id), l = e.liabs.find(x => x.id === lid);
+    dynModal('تسديد التزام', `<p class="text-sm">${esc(l.kind)} — ${esc(l.desc || '')}: <b>${fmt(l.amount)} ${esc(l.cur)}</b></p>${fld('ep-acc', 'من حساب المتوفى', `<select id="ep-acc" class="input-field">${optList(accNames())}</select>`)}${fld('ep-d', 'التاريخ', `<input id="ep-d" type="date" class="input-field" value="${todayStr()}">`)}`, 'تأكيد التسديد', () => {
+        const cat = 'تركة: ' + l.kind; ensureCat(cat); mkTx({ type: 'صرف', amount: l.amount, currency: l.cur, account: $('ep-acc').value, owner: e.deceased, date: $('ep-d').value || todayStr(), category: cat, party: l.desc || l.kind, notes: 'تركة ' + e.deceased, tags: ['تركة'] }); l.paid = true; saveData(); });
+}
+function estLiabDel(id, lid) { if (!confirm('حذف الالتزام من القائمة؟')) return; const e = estOf(id); e.liabs = e.liabs.filter(l => l.id !== lid); saveData(); }
+/* --- صدقات وزكاة --- */
+function estCharityDel(id, cid) {
+    const e = estOf(id), i = (e.charity || []).findIndex(c => c.id === cid), c = e.charity[i]; if (!c) return;
+    if (!confirm(`حذف ${c.kind} بمبلغ ${fmtRaw(c.amount)} ${c.cur}؟ تُحذف حركتها ويعود المبلغ إلى حساب المتوفى.`)) return;
+    [appData.transactions, archived].forEach(a => { const k = a.findIndex(t => String(t.id) === String(c.txId)); if (k >= 0) a.splice(k, 1); });
+    e.charity.splice(i, 1); saveData(); toast('حُذفت واستُردّ المبلغ', 'ok');
+}
+function estCharityModal(id) {
+    const e = estOf(id); dynModal('🤲 إخراج صدقة / زكاة من التركة', `<p class="eq-hint">تُخصم من حسابات المتوفى قبل التوزيع (فتقلّ التركة، وتتحملها الأنصبة كلها بنسبتها).</p>
+      ${fld('ec-k', 'النوع', `<select id="ec-k" class="input-field"><option>صدقة عن المتوفى</option><option>زكاة مال المتوفى</option><option>كفارة / نذر</option><option>صدقة جارية</option></select>`)}
+      ${fld('ec-a', 'المبلغ', `<input id="ec-a" type="number" step="0.01" class="input-field">`)}${fld('ec-c', 'العملة', `<select id="ec-c" class="input-field">${optList(appData.currencies, zkSet().cur)}</select>`)}
+      ${fld('ec-acc', 'من حساب المتوفى', `<select id="ec-acc" class="input-field">${optList(accNames())}</select>`)}${fld('ec-d', 'التاريخ', `<input id="ec-d" type="date" class="input-field" value="${todayStr()}">`)}${fld('ec-n', 'المستفيد / ملاحظة', `<input id="ec-n" class="input-field">`)}`, 'تسجيل', () => {
+        const a = parseFloat($('ec-a').value); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        const k = $('ec-k').value, cat = 'تركة: ' + k; ensureCat(cat); const d = $('ec-d').value || todayStr(), c = $('ec-c').value;
+        const t = mkTx({ type: 'صرف', amount: a, currency: c, account: $('ec-acc').value, owner: e.deceased, date: d, category: cat, party: k, notes: $('ec-n').value.trim(), tags: ['تركة', 'صدقة'] });
+        e.charity.push({ id: 'c' + uid(), kind: k, amount: a, cur: c, date: d, note: $('ec-n').value.trim(), txId: t.id }); saveData(); });
+}
+/* --- التوزيع --- */
+function estDistModal(id, cur) {
+    const e = estOf(id), C = estCalc(e, cur);
+    if (!e.heirs.length) { toast('أضف الورثة أولاً', 'warn'); return; }
+    if (Math.abs(C.sum - 1) > 1e-6 && !confirm(`مجموع الأنصبة ${C.sum.toFixed(6)} وليس 1. هل تريد المتابعة بتوزيع نسبي على هذه الأنصبة؟`)) return;
+    const accs = (estLiquid(e)[cur] || []).filter(x => x.bal > 0);
+    if (!accs.length) { toast('لا رصيد موجب في حسابات المتوفى بهذه العملة', 'warn'); return; }
+    dynModal('📤 توزيع التركة (' + esc(cur) + ')', `<p class="eq-hint">يوزَّع المبلغ بحسب الأنصبة، وتُنشأ تحويلات من الحساب المختار إلى حساب كل وارث. المتاح: ${fmt(C.avail)}.</p>
+      ${fld('ed-acc', 'من حساب المتوفى', `<select id="ed-acc" class="input-field">${accs.map(x => `<option value="${esc(x.acc)}">${esc(x.acc)} — ${fmt(x.bal)}</option>`).join('')}</select>`)}
+      ${fld('ed-a', 'المبلغ المراد توزيعه', `<input id="ed-a" type="number" step="0.01" class="input-field" value="${C.avail}" oninput="estDistPreview('${id}')">`)}${fld('ed-d', 'التاريخ', `<input id="ed-d" type="date" class="input-field" value="${todayStr()}">`)}
+      <div id="ed-prev" class="text-xs space-y-1 bg-slate-50 rounded-xl p-3"></div>`, 'تنفيذ التوزيع', () => {
+        const total = round2(parseFloat($('ed-a').value)); if (!(total > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        const src = $('ed-acc').value, bal = getBalance(e.deceased, src, cur); if (total > bal + 0.005) { toast('المبلغ أكبر من رصيد الحساب المختار', 'err'); return false; }
+        const items = estSplit(e, total), d = $('ed-d').value || todayStr(), rec = [];
+        items.forEach(i => { if (!(i.amount > 0)) return; const t = mkTx({ type: 'تحويل', amount: i.amount, currency: cur, fromOwner: e.deceased, toOwner: i.h.owner, fromAccount: src, toAccount: i.h.account || accNames()[0], date: d, party: `ميراث: ${e.deceased} ← ${i.h.owner}`, notes: 'نصيب ' + (+i.h.share).toFixed(6), tags: ['ميراث'] }); rec.push({ heirId: i.h.id, heir: i.h.owner, amount: i.amount, txId: t.id }); });
+        e.dist.push({ id: 'd' + uid(), date: d, cur, total, account: src, items: rec }); saveData(); toast('تم التوزيع على الورثة', 'ok'); });
+    estDistPreview(id);
+}
+function estSplit(e, total) {
+    const sum = e.heirs.reduce((s, h) => s + (+h.share || 0), 0) || 1; let used = 0;
+    return e.heirs.map((h, i) => { const a = i === e.heirs.length - 1 ? round2(total - used) : round2(total * (+h.share) / sum); used = round2(used + a); return { h, amount: a }; });
+}
+function estDistPreview(id) { const e = estOf(id), t = parseFloat($('ed-a').value) || 0, p = $('ed-prev'); if (p) p.innerHTML = estSplit(e, t).map(i => `<div class="flex justify-between"><span>${esc(i.h.owner)} ${i.h.minor ? '(قاصر)' : ''} — ${(+i.h.share).toFixed(6)}</span><b>${fmt(i.amount)}</b></div>`).join(''); }
+/* --- الكشف --- */
+function estReport(id) {
+    const e = estOf(id); const lines = [`كشف تركة المرحوم/ة ${e.deceased}`, `تاريخ الوفاة: ${e.deathDate || '—'} ${e.deathDate ? '(' + hijriFmt(e.deathDate) + ')' : ''}`, e.court ? `حصر الإرث: ${e.court}` : ''];
+    const curs = [...new Set([...Object.keys(estLiquid(e)), ...(e.liabs || []).map(l => l.cur), ...(e.dist || []).map(d => d.cur)])];
+    curs.forEach(c => { const C = estCalc(e, c); lines.push('', `— العملة ${c} —`, `السيولة الحالية: ${fmtRaw(C.liq)} | الموزَّع سابقاً: ${fmtRaw(C.distributed)} | التزامات غير مسدّدة: ${fmtRaw(C.unpaid)} | صافي التركة: ${fmtRaw(C.base)}`); C.rows.forEach(r => lines.push(`${r.h.owner} (${r.h.relation || ''}${r.h.minor ? '، قاصر' : ''}) نصيبه ${(+r.h.share).toFixed(6)} = ${(r.h.share * 100).toFixed(4)}% : يستحق ${fmtRaw(r.ent)} · استلم ${fmtRaw(r.rec)} · المتبقي ${fmtRaw(r.left)}`)); });
+    if ((e.charity || []).length) { lines.push('', 'الصدقات والزكاة من التركة:'); e.charity.forEach(c => lines.push(`${c.date} ${c.kind}: ${fmtRaw(c.amount)} ${c.cur} ${c.note || ''}`)); }
+    const txt = lines.filter(x => x !== null).join('\n');
+    dynModal('📋 كشف التركة', `<textarea id="er-txt" class="input-field text-xs" rows="14" readonly>${esc(txt)}</textarea>`, null, null, true);
+    const w = $('dyn-modal').querySelector('.space-y-3'); w.insertAdjacentHTML('beforeend', `<button class="btn-primary text-sm px-4 py-2" onclick="estCopy()">📋 نسخ الكشف</button>`);
+}
+function estCopy() { const t = $('er-txt'); t.select(); try { navigator.clipboard.writeText(t.value); toast('نُسخ الكشف', 'ok', 2000); } catch (e) { document.execCommand('copy'); toast('نُسخ', 'ok', 2000); } }
+
+/* ---------- الربط بالتطبيق ---------- */
+const _showTab20 = showTab;
+showTab = function (id) { _showTab20.apply(this, arguments); if (id === 'inherit') renderInherit(); };
+const _renderExtras20 = renderExtras;
+renderExtras = function () { _renderExtras20.apply(this, arguments); try { const s = $('sec-inherit'); if (s && !s.classList.contains('hidden') && !$('dyn-modal')) renderInherit(); } catch (e) { console.error(e); } };
+const _renderSettingsLists20 = renderSettingsLists;
+renderSettingsLists = function () { _renderSettingsLists20.apply(this, arguments); try { renderZakatSettings(); } catch (e) { } };
+const _subLock20 = subLock;
+subLock = function () { _subLock20.apply(this, arguments); const t = $('tab-inherit'); if (t) t.style.display = inhAllowed() ? '' : 'none'; };
+
+/* =====================================================================
+   v7.7 — الأدوار: مدير النظام / رئيسي مقيّد (ينوب عن حسابات محددة) / فرعي
+   v7.8 — مساحة التركة المستقلة: تصدير مساحة، تحديثات متبادلة، ربط التوزيعات بالحسابات
+   ===================================================================== */
+const ROLE_LABEL = { 'رئيسي': 'مدير النظام', 'مقيّد': 'رئيسي مقيّد', 'فرعي': 'حساب فرعي' };
+const roleLabel = r => ROLE_LABEL[r] || r;
+const REAL = { name: null, acting: false };
+const scopeOf = n => { const u = getUser(n) || {}; return Object.assign({ owners: [], inherit: false }, u.scope || {}); };
+const realUser = () => getUser(REAL.name) || getUser(currentUser) || {};
+const isScoped = () => realUser().role === 'مقيّد';
+const inhAllowed = () => isMain() || (isScoped() && scopeOf(realUser().name).inherit);
+
+/* ---------- واجهة تعديل الحساب: نطاق المقيّد ---------- */
+(function () {
+    const sel = document.getElementById('um-role');
+    if (sel && ![...sel.options].some(o => o.value === 'مقيّد')) sel.add(new Option('رئيسي مقيّد (ينوب عن حسابات محددة)', 'مقيّد'));
+    [...(sel ? sel.options : [])].forEach(o => { if (o.value === 'رئيسي') o.text = 'مدير النظام (كل الصلاحيات)'; });
+    const s2 = document.querySelector('#settings-new-user-role, #setting-new-user-role');
+    if (s2) { if (![...s2.options].some(o => o.value === 'مقيّد')) s2.add(new Option('رئيسي مقيّد', 'مقيّد')); [...s2.options].forEach(o => { if (o.value === 'رئيسي') o.text = 'مدير النظام'; }); }
+    const note = document.getElementById('um-note');
+    if (note && !document.getElementById('um-scope')) note.insertAdjacentHTML('beforebegin', '<div id="um-scope" class="hidden border rounded-2xl p-3 space-y-2 bg-slate-50"></div>');
+    if (sel) sel.addEventListener('change', umScopeRender);
+})();
+function umScopeRender() {
+    const box = $('um-scope'); if (!box) return; const role = $('um-role').value;
+    box.classList.toggle('hidden', role !== 'مقيّد'); if (role !== 'مقيّد') return;
+    const u = appData.users.find(x => x.id === editUserId) || {}, sc = Object.assign({ owners: [], inherit: false }, u.scope || {});
+    box.innerHTML = `<b class="text-xs">الحسابات التي ينوب عنها (يتصفحها ويتحكم بها):</b><div class="grid grid-cols-2 gap-1 text-xs">${appData.users.filter(x => x.id !== u.id).map(x => `<label class="flex items-center gap-1"><input type="checkbox" class="um-sc-o" value="${esc(x.name)}" ${sc.owners.includes(x.name) ? 'checked' : ''}> ${esc(x.name)}</label>`).join('')}</div>
+      <label class="flex items-center gap-2 text-xs font-bold"><input type="checkbox" id="um-sc-inh" ${sc.inherit ? 'checked' : ''}> يحق له لوحة المواريث والزكوات</label>
+      <p class="eq-hint">يرى ويتحكم بحسابه وحسابات النطاق فقط (يبدّل بينها من أعلى الصفحة)، وتبقى حركاته الجديدة بانتظار اعتماد المدير. لا يصل للإعدادات العامة ولا النسخ الاحتياطية ولا بقية الحسابات.</p>`;
+}
+const _openUserModal = openUserModal;
+openUserModal = function (id) { _openUserModal.apply(this, arguments); try { umScopeRender(); } catch (e) { } };
+const _saveUserEdit = saveUserEdit;
+saveUserEdit = function () {
+    const id = editUserId, role = $('um-role') && $('um-role').value, main = isMain();
+    const sc = main && role === 'مقيّد' ? { owners: [...document.querySelectorAll('.um-sc-o:checked')].map(c => c.value), inherit: !!($('um-sc-inh') && $('um-sc-inh').checked) } : null;
+    const oldOwners = (appData.users.find(x => x.id === id) || {}).name;
+    const r = _saveUserEdit.apply(this, arguments);
+    const u = appData.users.find(x => x.id === id);
+    if (u && main) { if (u.role === 'مقيّد') u.scope = sc || u.scope || { owners: [], inherit: false }; else delete u.scope; if (oldOwners && u.name !== oldOwners) appData.users.forEach(x => { if (x.scope) x.scope.owners = x.scope.owners.map(n => n === oldOwners ? u.name : n); }); saveData(); }
+    return r;
+};
+
+/* ---------- التبديل بين الحسابات المنوب عنها ---------- */
+function actAs(name) {
+    const ok = name === REAL.name || scopeOf(REAL.name).owners.includes(name); if (!ok) return;
+    REAL.acting = name !== REAL.name; currentUser = name;
+    $('current-user-display').innerText = name + (REAL.acting ? ' (نيابةً)' : '');
+    try { initDropdowns(); if ($('tx-owner')) $('tx-owner').value = currentUser; } catch (e) { }
+    updateUIRoles(); showTab('dashboard'); renderAll();
+}
+function roleUiRefresh() {
+    const real = realUser(), badge = $('role-badge');
+    if (badge) { badge.innerText = roleLabel(real.role || currentRole); badge.className = 'badge mr-1 ' + (real.role === 'رئيسي' ? 'bg-teal-200 text-teal-900' : real.role === 'مقيّد' ? 'bg-indigo-200 text-indigo-900' : 'bg-amber-200 text-amber-900'); }
+    let sel = $('act-as');
+    if (isScoped()) {
+        if (!sel) { const host = $('current-user-display'); if (host && host.parentElement) { host.parentElement.insertAdjacentHTML('afterend', '<select id="act-as" class="px-2 py-1 rounded-xl text-xs font-bold bg-indigo-50 border border-indigo-200 text-indigo-900" onchange="actAs(this.value)" title="التبديل بين الحسابات التي تنوب عنها"></select>'); sel = $('act-as'); } }
+        if (sel) { const names = [REAL.name, ...scopeOf(REAL.name).owners].filter(n => getUser(n)); sel.innerHTML = names.map(n => `<option value="${esc(n)}" ${n === currentUser ? 'selected' : ''}>${n === REAL.name ? '👤 حسابي: ' : '↔️ أنوب عن: '}${esc(n)}</option>`).join(''); sel.style.display = ''; }
+    } else if (sel) sel.style.display = 'none';
+    const t = $('tab-inherit'); if (t) t.style.display = inhAllowed() ? '' : 'none';
+    const h1 = document.querySelector('header h1'); if (h1) h1.textContent = appData.workspace && appData.workspace.kind === 'estate' ? '📜 مساحة تركة ' + appData.workspace.deceased : 'برنامج المصاريف اليومي 💎';
+}
+const _updateUIRoles21 = updateUIRoles;
+updateUIRoles = function () { if (!REAL.acting) REAL.name = currentUser; const r = _updateUIRoles21.apply(this, arguments); try { roleUiRefresh(); } catch (e) { console.error(e); } return r; };
+const _logout21 = logout;
+logout = function () { REAL.acting = false; REAL.name = null; return _logout21.apply(this, arguments); };
+
+/* =====================================================================
+   v7.8 — مساحة التركة المستقلة
+   ===================================================================== */
+const rndPass = () => 'x' + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
+const clone = o => JSON.parse(JSON.stringify(o));
+const WS = () => appData.workspace && appData.workspace.kind === 'estate' ? appData.workspace : null;
+const estLocked = e => !!(e.workspace && e.workspace.lastImport && !e.workspace.unlinked);
+
+/* --- (١) تصدير مساحة مستقلة (في نسخة المدير) --- */
+function estWsExportModal(id) {
+    const e = estOf(id), names = zkOwners().filter(n => n !== e.deceased);
+    const reps = [...new Set(e.heirs.map(h => h.repr).filter(Boolean))];
+    dynModal('📦 إنشاء مساحة مستقلة لتركة ' + esc(e.deceased), `<p class="eq-hint">ينتج ملف نسخة نظيفة يحوي فقط: حسابات المتوفى بأرصدتها، والورثة، والأنصبة، والأصول والالتزامات. <b>لا يحوي أي حركة أو حساب آخر من بياناتك.</b> تعطيه لمديرة التركة فتفتحه من «الإعدادات ← استرجاع نسخة».</p>
+      ${fld('ew-m', 'مديرة/مدير التركة (رئيسي في المساحة)', `<select id="ew-m" class="input-field">${optList(names, (e.heirs.find(h => h.relation && /كبر|منسق/.test(h.relation)) || {}).owner)}</select>`)}
+      ${fld('ew-mp', 'كلمة مرور المدير في المساحة (يغيّرها لاحقاً)', `<input id="ew-mp" class="input-field" value="${Math.floor(1000 + Math.random() * 9000)}">`)}
+      ${reps.length ? `<b class="text-xs">النوّاب (يتصفحون حسابات من ينوبون عنهم فقط):</b>` + reps.map((r, i) => fld('ew-r' + i, 'كلمة مرور ' + esc(r), `<input id="ew-r${i}" class="input-field" value="${Math.floor(1000 + Math.random() * 9000)}">`)).join('') : '<p class="eq-hint">لا نوّاب محددون (حدّد «ينوب عنه» في بيانات الوارث).</p>'}
+      <p class="eq-hint">⚠️ بعد التصدير ما تسجّله هنا في هذه التركة لن يصل المساحة. وتُقفل التركة عندك فقط بعد أن تستورد أول تحديث منها. لتجربة المساحة افتح الملف في متصفح أو ملف شخصي آخر (أو جهاز آخر) عبر الإعدادات ← استرجاع نسخة، ثم ادخل باسم المدير وكلمة المرور أعلاه.</p>
+      <p class="eq-hint">الورثة الباقون يُنشأ لهم حساب في المساحة بدون كلمة مرور معروفة، يتصفحه المدير أو نائبهم.</p>`, 'إنشاء الملف', () => {
+        const mgr = $('ew-m').value, mp = $('ew-mp').value.trim(); if (!mgr || !mp) { toast('حدّد المدير وكلمة مروره', 'err'); return false; }
+        const repPass = {}; reps.forEach((r, i) => repPass[r] = $('ew-r' + i).value.trim() || rndPass());
+        const d = clone(DEFAULT_DATA); d.users = []; d.accounts = appData.accounts.map(a => ({ id: a.id, name: a.name, type: a.type })); d.currencies = [...appData.currencies]; d.categories = [...appData.categories]; d.parties = [];
+        d.settings = { goalPastLimit: { value: 30, unit: 'day' }, rates: clone((appData.settings || {}).rates || {}), totalCur: (appData.settings || {}).totalCur };
+        const mk = (name, pass, role, extra) => { if (!d.users.some(u => u.name === name)) d.users.push(Object.assign({ id: 'u_' + uid(), name, pass, role }, extra || {})); };
+        mk(mgr, mp, 'رئيسي'); mk(e.deceased, rndPass(), 'فرعي'); e.heirs.forEach(h => mk(h.owner, rndPass(), 'فرعي'));
+        reps.forEach(r => mk(r, repPass[r], 'مقيّد', { scope: { owners: e.heirs.filter(h => h.repr === r).map(h => h.owner), inherit: false } }));
+        const today = todayStr(), src = 'ws' + uid(), tag = { equivalentCurrencies: {}, bucket: 'مصاريف', submittedBy: mgr, opening: true };
+        appData.accounts.forEach(a => appData.currencies.forEach(c => { const b = getBalance(e.deceased, a.name, c); if (b > 0.004) d.transactions.push(Object.assign({ id: uid(), type: 'إيداع', amount: b, currency: c, account: a.name, accountId: a.id, owner: e.deceased, date: today, party: 'رصيد افتتاحي للتركة' }, tag)); }));
+        const ce = clone(e); delete ce.workspace; delete ce.view; d.estates = [ce];
+        d.workspace = { kind: 'estate', estateId: e.id, sourceId: src, deceased: e.deceased, manager: mgr, host: currentUser, createdAt: today };
+        const pkg = { __wallet_backup: 4, appVersion: APP_VERSION, exportedAt: new Date().toISOString(), appData: d, archived_movements: [], images: {} };
+        downloadBlob(new Blob([JSON.stringify(pkg)], { type: 'application/json' }), `مساحة-تركة-${e.deceased}.json`);
+        e.workspace = { sourceId: src, manager: mgr, exportedAt: new Date().toISOString(), lastImport: null }; saveData();
+        toast('أُنشئ ملف المساحة — سلّمه للمدير ليسترجعه من الإعدادات', 'ok', 7000);
+    });
+}
+/* --- (٢) من المساحة: إرسال تحديث للمدير الأعلى --- */
+async function wsExportUpdate() {
+    const W = WS(); if (!W) return; const e = estOf(W.estateId);
+    const obj = { __estate_update: 1, sourceId: W.sourceId, estateId: W.estateId, exportedAt: new Date().toISOString(), estate: clone(e), txs: clone(allMovements().filter(t => !t.opening)) };
+    const name = `تحديث-تركة-${W.deceased}-${todayStr()}.json`, blob = new Blob([JSON.stringify(obj)], { type: 'application/json' });
+    try { const f = new File([blob], name, { type: 'application/json' }); if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: 'تحديث التركة', text: 'ملف تحديث تركة ' + W.deceased }); return; } } catch (err) { if (err && err.name === 'AbortError') return; }
+    downloadBlob(blob, name); toast('نُزّل ملف التحديث — أرسله للمدير عبر واتساب أو أي وسيلة', 'ok', 6000);
+}
+/* --- (٣) في نسخة المدير: استيراد التحديث وربطه بالحسابات --- */
+function estImportUpdateOpen() { let i = $('eu-file'); if (!i) { i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.id = 'eu-file'; i.className = 'hidden'; i.onchange = estImportUpdateFile; document.body.appendChild(i); } i.value = ''; i.click(); }
+function estImportUpdateFile(ev) {
+    const f = ev.target.files[0]; if (!f) return; const r = new FileReader();
+    r.onload = () => { let u; try { u = JSON.parse(r.result); } catch (e) { toast('الملف غير صالح', 'err'); return; } estImportUpdate(u); }; r.readAsText(f);
+}
+function estImportUpdate(u) {
+    if (!u || !u.__estate_update || !Array.isArray(u.txs) || !u.estate) { toast('هذا ليس ملف تحديث تركة', 'err'); return; }
+    const e = estOf(u.estateId); if (!e) { toast('لا توجد في نسختك تركة بهذا المعرّف', 'err'); return; }
+    if (e.workspace && e.workspace.sourceId !== u.sourceId) { toast('الملف من مساحة غير المساحة المرتبطة بهذه التركة', 'err'); return; }
+    const src = u.sourceId, mine = [appData.transactions, archived], find = id => { for (const a of mine) { const i = a.findIndex(t => String(t.id) === String(id)); if (i >= 0) return { a, i }; } return null; };
+    const inIds = new Set(u.txs.map(t => String(t.id))); let add = 0, chg = 0, del = 0; const toUsers = {};
+    u.txs.forEach(t => { const f = find(t.id); if (!f) { add++; if (t.type === 'تحويل' && t.toOwner) toUsers[t.toOwner] = round2((toUsers[t.toOwner] || 0) + t.amount); } else if (f.a[f.i].wsOrigin === src && JSON.stringify(Object.assign({}, f.a[f.i], { wsOrigin: undefined })) !== JSON.stringify(Object.assign({}, t, { wsOrigin: undefined }))) chg++; });
+    mine.forEach(a => a.forEach(t => { if (t.wsOrigin === src && !inIds.has(String(t.id))) del++; }));
+    const unknown = [...new Set(u.txs.flatMap(t => [t.owner, t.fromOwner, t.toOwner]).filter(n => n && !getUser(n)))];
+    const msg = `<p class="text-sm">تحديث تركة <b>${esc(e.deceased)}</b> المُصدَّر ${esc(new Date(u.exportedAt).toLocaleString('ar-EG'))}</p><ul class="text-sm list-disc pr-5 space-y-1"><li>حركات جديدة تُضاف: <b>${add}</b></li><li>حركات معدّلة: <b>${chg}</b></li><li>حركات محذوفة في المساحة وتُحذف عندك: <b>${del}</b></li>${Object.keys(toUsers).length ? `<li>تحويلات إلى حسابات الورثة: ${Object.entries(toUsers).map(([n, v]) => esc(n) + ' ' + fmt(v)).join('، ')}</li>` : ''}</ul>${unknown.length ? `<p class="text-amber-700 text-xs font-bold">⚠️ أسماء غير موجودة بين مستخدميك: ${unknown.map(esc).join('، ')} — ستُسجَّل الحركات لكنها لن تظهر في حساب مستخدم.</p>` : ''}<p class="eq-hint">تدخل الحركات في سجلاتك وأرصدتك ويُحدَّث كشف التركة، وبالتالي تصل تحويلات التوزيع إلى حسابات الورثة الفرعية. الاستيراد آمن للتكرار.</p>`;
+    dynModal('📥 استيراد تحديث تركة', msg, 'تطبيق التحديث', () => {
+        u.txs.forEach(t => { const nt = Object.assign({}, t, { wsOrigin: src }); if (nt.account && !nt.accountId) nt.accountId = (getAcc(nt.account) || {}).id; if (nt.category && !appData.categories.includes(nt.category)) appData.categories.push(nt.category); const f = find(t.id); if (f) f.a[f.i] = nt; else appData.transactions.push(nt); });
+        mine.forEach((a, k) => { for (let i = a.length - 1; i >= 0; i--) if (a[i].wsOrigin === src && !inIds.has(String(a[i].id))) a.splice(i, 1); });
+        const keep = { id: e.id, view: e.view, workspace: Object.assign({}, e.workspace || { sourceId: src }, { unlinked: false, sourceId: src, lastImport: new Date().toISOString(), exportedAt: u.exportedAt }) };
+        const ne = clone(u.estate); Object.keys(e).forEach(k => delete e[k]); Object.assign(e, ne, keep);
+        saveData(); toast(`طُبّق التحديث: +${add} · ~${chg} · −${del}`, 'ok', 6000);
+    });
+}
+function estUnlink(id) { const e = estOf(id); if (!confirm('فك الربط يتيح لك تعديل التركة هنا مباشرة، وقد يتعارض مع مساحة المديرة. متابعة؟')) return; e.workspace.unlinked = true; saveData(); }
+
+/* --- (٤) أزرار الواجهة داخل لوحة المواريث --- */
+const _renderEstates = renderEstates;
+renderEstates = function () {
+    _renderEstates.apply(this, arguments); const box = $('inh-content'); if (!box) return;
+    const W = WS(), bar = [];
+    if (W) bar.push(`<div class="card p-4 border-2 border-indigo-300 bg-indigo-50/40 space-y-2"><b class="text-sm">🏛️ مساحة تركة مستقلة — أنشأها ${esc(W.host)} بتاريخ ${esc(W.createdAt)}</b><p class="eq-hint">عملك هنا مستقل عن بيانات المدير. أرسل له «تحديثاً» ليصله كل ما سجّلته، فيظهر عنده الكشف وتصل التوزيعات إلى حسابات الورثة.</p><button class="btn-primary text-sm px-4 py-2" onclick="wsExportUpdate()">📤 إرسال تحديث للمدير</button></div>`);
+    else if (isMain()) bar.push(`<div class="flex justify-end"><button class="btn-secondary text-sm px-4 py-2" onclick="estImportUpdateOpen()">📥 استيراد تحديث تركة</button></div>`);
+    if (bar.length) box.insertAdjacentHTML('afterbegin', bar.join(''));
+};
+const _estCard = estCard;
+estCard = function (e) {
+    let h = _estCard.apply(this, arguments);
+    if (WS()) return h;
+    if (estLocked(e)) {
+        h = h.replace(/<button([^>]*onclick="(?:estIncomeModal|estAssetModal|estLiabModal|estCharityModal|estCharityDel|estIncomeDel|estDistModal|estHeirModal|estHeirDel|estReceive|estPayLiab|estAssetDel|estLiabDel)[^>]*)>/g, '<button disabled title="التركة تُدار في مساحة مستقلة" $1>');
+        h = h.replace('<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center text-sm">', `<div class="text-xs bg-indigo-50 border border-indigo-200 rounded-xl p-2 flex flex-wrap items-center justify-between gap-2"><span>🏛️ تُدار في مساحة مستقلة (${esc(e.workspace.manager)}) · ${e.workspace.lastImport ? 'آخر تحديث مستورد: ' + esc(new Date(e.workspace.lastImport).toLocaleString('ar-EG')) : 'لم يُستورد تحديث بعد'} · التعديل المباشر هنا معطّل</span><button class="px-2 py-1 bg-white border rounded-lg" onclick="event.stopPropagation();estUnlink('${e.id}')">فك الربط</button></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center text-sm">`);
+    } else if (isMain() && INH.open[e.id]) h = h.replace(/(<button class="btn-secondary text-xs px-3 py-2" onclick="estReport)/, `<button class="btn-secondary text-xs px-3 py-2" onclick="estWsExportModal('${e.id}')">📦 إنشاء مساحة مستقلة</button>$1`);
+    return h;
+};
+
+/* =====================================================================
+   v7.9 — إصلاحات مراجعة المساحة المستقلة + المعاشات والمستحقات + الأمانات
+   ===================================================================== */
+const eomOf = d => d.slice(0, 8) + pad(dim(+d.slice(0, 4), +d.slice(5, 7)));
+const sumBy = (a, f) => round2(a.reduce((s, x) => s + (+f(x) || 0), 0));
+
+/* ---------- (١) إصلاحات المراجعة ---------- */
+// تحقق قبل إنشاء مساحة
+const _estWsExportModal22 = estWsExportModal;
+estWsExportModal = function (id) {
+    const e = estOf(id), sum = (e.heirs || []).reduce((s, h) => s + (+h.share || 0), 0);
+    if (!(e.heirs || []).length) { toast('أضف الورثة وأنصبتهم أولاً — المساحة تُبنى منهم', 'err', 6000); return; }
+    if (Math.abs(sum - 1) > 1e-6) { toast('مجموع الأنصبة ' + sum.toFixed(6) + ' ولا يساوي 1 — أكمل الأنصبة قبل إنشاء المساحة', 'err', 7000); return; }
+    return _estWsExportModal22.apply(this, arguments);
+};
+function estCancelWs(id) {
+    const e = estOf(id); if (!confirm('إلغاء ربط المساحة؟ ستعود التركة قابلة للتعديل هنا بالكامل، وأي تحديث قادم من تلك المساحة لن يُقبل حتى تنشئ مساحة جديدة.')) return;
+    delete e.workspace; saveData(); toast('أُلغيت المساحة', 'ok');
+}
+// من يدير أي تركة (للرئيسي المقيّد)
+const estAccessible = e => isMain() || !!WS() || (e.managers || []).includes(REAL.name || currentUser);
+function estManagersModal(id) {
+    const e = estOf(id), cur = e.managers || [], cand = appData.users.filter(u => u.role === 'مقيّد' || (u.scope && u.scope.inherit));
+    dynModal('👥 من يدير تركة ' + esc(e.deceased), `<p class="eq-hint">الرئيسي المقيّد الذي له صلاحية المواريث يرى ويدير فقط التركات التي تختارها هنا.</p>${cand.length ? cand.map(u => `<label class="flex items-center gap-2 text-sm font-bold"><input type="checkbox" class="em-chk" value="${esc(u.name)}" ${cur.includes(u.name) ? 'checked' : ''}> ${esc(u.name)}</label>`).join('') : '<p class="text-xs text-slate-500">لا يوجد مستخدمون «رئيسي مقيّد» بعد (أضفهم من الإعدادات ← المستخدمون).</p>'}`, 'حفظ', () => {
+        e.managers = [...document.querySelectorAll('.em-chk:checked')].map(x => x.value); saveData(); });
+}
+
+/* ---------- (٢) الأمانات والالتزامات بدفعات + سقف شهري للقاصر ---------- */
+if (!E_LIAB.includes('أمانة')) E_LIAB.splice(1, 0, 'أمانة');
+estLiabModal = function (id) {
+    const e = estOf(id); dynModal('＋ التزام على التركة', `${fld('el-k', 'النوع (الأمانة = مال لغير الورثة موضوع عند المتوفى)', `<select id="el-k" class="input-field">${optList(E_LIAB)}</select>`)}${fld('el-d', 'الوصف / صاحب الحق', `<input id="el-d" class="input-field" placeholder="مثال: أمانة أخ المتوفى">`)}
+      ${fld('el-a', 'المبلغ', `<input id="el-a" type="number" step="0.01" class="input-field">`)}${fld('el-c', 'العملة', `<select id="el-c" class="input-field">${optList(appData.currencies, zkSet().cur)}</select>`)}
+      ${fld('el-u', 'حساب صاحب الحق في البرنامج (اختياري — تُحوَّل إليه الدفعات تلقائياً)', `<select id="el-u" class="input-field"><option value="">— ليس مستخدماً: تُسجَّل الدفعة مصروفاً —</option>${zkOwners().filter(n => n !== e.deceased).map(n => `<option>${esc(n)}</option>`).join('')}</select>`)}`, 'إضافة', () => {
+        const a = parseFloat($('el-a').value); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        e.liabs.push({ id: 'l' + uid(), kind: $('el-k').value, desc: $('el-d').value.trim(), amount: a, cur: $('el-c').value, paid: false, paidAmt: 0, toUser: $('el-u').value, pays: [] }); saveData(); });
+};
+const liabRem = l => round2(Math.max(0, (+l.amount || 0) - (+l.paidAmt || 0)));
+function liabPay(e, l, amount, acc, date) {
+    const cat = 'تركة: ' + l.kind; ensureCat(cat); let t;
+    if (l.toUser) t = mkTx({ type: 'تحويل', amount, currency: l.cur, fromOwner: e.deceased, toOwner: l.toUser, fromAccount: acc, toAccount: accNames()[0], date, party: `${l.kind}: ${l.desc || ''} ← ${l.toUser}`, notes: 'تركة ' + e.deceased, tags: ['تركة', l.kind] });
+    else t = mkTx({ type: 'صرف', amount, currency: l.cur, account: acc, owner: e.deceased, date, category: cat, party: l.desc || l.kind, notes: 'تركة ' + e.deceased, tags: ['تركة'] });
+    l.paidAmt = round2((+l.paidAmt || 0) + amount); (l.pays = l.pays || []).push({ date, amount, txId: t.id }); if (liabRem(l) <= 0.004) l.paid = true; return t;
+}
+estPayLiab = function (id, lid) {
+    const e = estOf(id), l = e.liabs.find(x => x.id === lid), rem = liabRem(l);
+    dynModal('تسديد التزام', `<p class="text-sm">${esc(l.kind)} — ${esc(l.desc || '')}: الإجمالي <b>${fmt(l.amount)}</b> · المتبقي <b>${fmt(rem)} ${esc(l.cur)}</b></p>${fld('ep-a', 'مبلغ هذه الدفعة', `<input id="ep-a" type="number" step="0.01" class="input-field" value="${rem}">`)}${fld('ep-acc', 'من حساب المتوفى', `<select id="ep-acc" class="input-field">${optList(accNames())}</select>`)}${fld('ep-d', 'التاريخ', `<input id="ep-d" type="date" class="input-field" value="${todayStr()}">`)}`, 'تأكيد التسديد', () => {
+        const a = round2(parseFloat($('ep-a').value)); if (!(a > 0) || a > rem + 0.005) { toast('المبلغ غير صالح (أكبر من المتبقي؟)', 'err'); return false; }
+        liabPay(e, l, a, $('ep-acc').value, $('ep-d').value || todayStr()); saveData(); });
+};
+// سقف شهري للوارث (للقاصر مثلاً) + حقل في نافذة الوارث
+estHeirModal = function (id, hid) {
+    const e = estOf(id), h = hid ? e.heirs.find(x => x.id === hid) : null;
+    dynModal(h ? '✏️ وارث' : '👪 وارث جديد', `${fld('eh-o', 'الوارث (حساب في البرنامج)', `<select id="eh-o" class="input-field">${optList(zkOwners().filter(n => n !== e.deceased), h && h.owner)}</select>`)}
+      ${fld('eh-rel', 'صلة القرابة', `<input id="eh-rel" class="input-field" placeholder="ابن، بنت، زوجة، حفيد..." value="${esc(h ? h.relation || '' : '')}">`)}
+      ${fld('eh-sh', 'النصيب المعتمد (كسر عشري مثل 0.123525)', `<input id="eh-sh" type="number" step="0.000001" class="input-field" value="${h ? h.share : ''}">`)}
+      ${fld('eh-acc', 'حساب الاستلام', `<select id="eh-acc" class="input-field">${optList(accNames(), h && h.account)}</select>`)}
+      <label class="flex items-center gap-2 text-xs font-bold"><input type="checkbox" id="eh-min" ${h && h.minor ? 'checked' : ''}> قاصر</label>
+      ${fld('eh-gu', 'الوصي / الولي (للقاصر)', `<input id="eh-gu" class="input-field" value="${esc(h ? h.guardian || '' : '')}">`)}
+      <div class="grid grid-cols-2 gap-2">${fld('eh-cap', 'حد أقصى لما يُصرف له في كل توزيع (اختياري)', `<input id="eh-cap" type="number" step="0.01" class="input-field" value="${h && h.cap ? h.cap : ''}" placeholder="مثال: 20">`)}${fld('eh-capc', 'عملة الحد', `<select id="eh-capc" class="input-field">${optList(appData.currencies, (h && h.capCur) || zkSet().cur)}</select>`)}</div>
+      <p class="eq-hint">الزائد عن الحد لا يضيع: يبقى نصيباً مستحقاً له ويُصرف في التوزيعات القادمة.</p>
+      ${fld('eh-rep', 'ينوب عنه في تصفح حسابه (اسم نائبه، اختياري — لمن لا يدخل البرنامج بنفسه)', `<input id="eh-rep" class="input-field" placeholder="مثال: ولاء كحيل" value="${esc(h ? h.repr || '' : '')}">`)}`, 'حفظ', () => {
+        const sh = parseFloat($('eh-sh').value); if (!(sh > 0 && sh <= 1)) { toast('النصيب كسر عشري بين 0 و1', 'err'); return false; }
+        const o = { id: h ? h.id : 'h' + uid(), owner: $('eh-o').value, relation: $('eh-rel').value.trim(), share: sh, account: $('eh-acc').value, minor: $('eh-min').checked, guardian: $('eh-gu').value.trim(), repr: $('eh-rep').value.trim(), cap: parseFloat($('eh-cap').value) || 0, capCur: $('eh-capc').value };
+        if (!h && e.heirs.some(x => x.owner === o.owner)) { toast('هذا الوارث مضاف مسبقاً', 'err'); return false; }
+        if (h) Object.assign(h, o); else e.heirs.push(o); saveData(); });
+};
+estSplit = function (e, total, cur) {
+    const sum = e.heirs.reduce((s, h) => s + (+h.share || 0), 0) || 1; let used = 0;
+    return e.heirs.map((h, i) => {
+        const raw = i === e.heirs.length - 1 ? round2(total - used) : round2(total * (+h.share) / sum); used = round2(used + raw);
+        const capped = h.cap > 0 && (!cur || !h.capCur || h.capCur === cur) && raw > h.cap + 0.004;
+        return { h, amount: capped ? round2(h.cap) : raw, raw, capped };
+    });
+};
+estDistPreview = function (id) {
+    const e = estOf(id), cur = ($('ed-cur') || {}).value, t = Math.max(0, estDistHeirsPart()), p = $('ed-prev');
+    if (p) p.innerHTML = estSplit(e, t, cur).map(i => `<div class="flex justify-between"><span>${esc(i.h.owner)} ${i.h.minor ? '(قاصر)' : ''} — ${(+i.h.share).toFixed(6)}${i.capped ? ` <span class="text-amber-700">⛔ مقيّد بالحد ${fmt(i.h.cap)} (يبقى ${fmt(i.raw - i.amount)} له)</span>` : ''}</span><b>${fmt(i.amount)}</b></div>`).join('');
+};
+function estDistAmanas() { return [...document.querySelectorAll('.ed-am')].map(x => ({ id: x.dataset.lid, v: round2(parseFloat(x.value) || 0), el: x })); }
+function estDistHeirsPart() { const t = parseFloat(($('ed-a') || {}).value) || 0; return round2(t - estDistAmanas().reduce((s, a) => s + a.v, 0)); }
+function estDistAuto(id) {
+    const e = estOf(id), cur = $('ed-cur').value, C = estCalc(e, cur), t = parseFloat($('ed-a').value) || 0;
+    estDistAmanas().forEach(a => { const l = e.liabs.find(x => x.id === a.id); a.el.value = C.liq > 0 ? round2(Math.min(liabRem(l), t * liabRem(l) / C.liq)) : 0; });
+    estDistPreview(id);
+}
+estDistModal = function (id, cur) {
+    const e = estOf(id), C = estCalc(e, cur);
+    if (!e.heirs.length) { toast('أضف الورثة أولاً', 'warn'); return; }
+    if (Math.abs(C.sum - 1) > 1e-6 && !confirm(`مجموع الأنصبة ${C.sum.toFixed(6)} وليس 1. هل تريد المتابعة بتوزيع نسبي على هذه الأنصبة؟`)) return;
+    const accs = (estLiquid(e)[cur] || []).filter(x => x.bal > 0);
+    if (!accs.length) { toast('لا رصيد موجب في حسابات المتوفى بهذه العملة', 'warn'); return; }
+    const am = (e.liabs || []).filter(l => !l.paid && l.kind === 'أمانة' && l.cur === cur), amRem = sumBy(am, liabRem), def = round2(Math.max(0, C.avail + amRem));
+    dynModal('📤 توزيع التركة (' + esc(cur) + ')', `<input type="hidden" id="ed-cur" value="${esc(cur)}"><p class="eq-hint">المبلغ المُخرَج من حساب المتوفى يُقسَم: حصة الأمانات (إن وُجدت) تذهب لأصحابها، والباقي يُوزَّع على الورثة بأنصبتهم مع مراعاة الحد الأقصى للقاصر. المتاح للورثة بعد الالتزامات${C.held ? ' والمحجوز' : ''}: ${fmt(C.avail)}.</p>
+      ${C.held ? `<p class="text-xs text-amber-700 font-bold">🔒 محجوز احتياطاً لخصم الجهة بأثر رجعي: ${fmt(C.held)} ${esc(cur)} (مخصوم من المتاح)</p>` : ''}
+      ${fld('ed-acc', 'من حساب المتوفى', `<select id="ed-acc" class="input-field">${accs.map(x => `<option value="${esc(x.acc)}">${esc(x.acc)} — ${fmt(x.bal)}</option>`).join('')}</select>`)}
+      ${fld('ed-a', 'المبلغ المُخرَج من الحساب (شامل حصة الأمانات)', `<input id="ed-a" type="number" step="0.01" class="input-field" value="${def}" oninput="estDistAuto('${id}')">`)}${fld('ed-d', 'التاريخ', `<input id="ed-d" type="date" class="input-field" value="${todayStr()}">`)}
+      ${am.length ? `<div class="border rounded-xl p-2 space-y-1"><b class="text-xs">🔐 حصة الأمانات من هذه الدفعة (تُحسب بنسبة المتبقي منها إلى إجمالي المال، ويمكنك تعديلها)</b>${am.map(l => `<div class="flex items-center gap-2 text-xs"><span class="flex-1">${esc(l.desc || 'أمانة')} — المتبقي ${fmt(liabRem(l))}</span><input type="number" step="0.01" class="input-field w-28 ed-am" data-lid="${l.id}" value="0" oninput="estDistPreview('${id}')"></div>`).join('')}</div>` : ''}
+      <div id="ed-prev" class="text-xs space-y-1 bg-slate-50 rounded-xl p-3"></div>`, 'تنفيذ التوزيع', () => {
+        const total = round2(parseFloat($('ed-a').value)); if (!(total > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        const src = $('ed-acc').value, bal = getBalance(e.deceased, src, cur); if (total > bal + 0.005) { toast('المبلغ أكبر من رصيد الحساب المختار', 'err'); return false; }
+        const ams = estDistAmanas().filter(a => a.v > 0), amTot = round2(ams.reduce((s, a) => s + a.v, 0)); if (amTot > total + 0.005) { toast('حصص الأمانات أكبر من المبلغ', 'err'); return false; }
+        for (const a of ams) { const l = e.liabs.find(x => x.id === a.id); if (a.v > liabRem(l) + 0.005) { toast('حصة أمانة أكبر من المتبقي منها', 'err'); return false; } }
+        const d = $('ed-d').value || todayStr(), items = estSplit(e, round2(total - amTot), cur), rec = [];
+        ams.forEach(a => liabPay(e, e.liabs.find(x => x.id === a.id), a.v, src, d));
+        items.forEach(i => { if (!(i.amount > 0)) return; const t = mkTx({ type: 'تحويل', amount: i.amount, currency: cur, fromOwner: e.deceased, toOwner: i.h.owner, fromAccount: src, toAccount: i.h.account || accNames()[0], date: d, party: `ميراث: ${e.deceased} ← ${i.h.owner}`, notes: 'نصيب ' + (+i.h.share).toFixed(6), tags: ['ميراث'] }); rec.push({ heirId: i.h.id, heir: i.h.owner, amount: i.amount, txId: t.id }); });
+        const given = round2(rec.reduce((s, r) => s + r.amount, 0)), kept = round2(total - amTot - given);
+        e.dist.push({ id: 'd' + uid(), date: d, cur, total: given, account: src, items: rec, amana: amTot }); saveData();
+        toast(`وُزّع ${fmtRaw(given)} على الورثة${amTot ? ' · أمانات ' + fmtRaw(amTot) : ''}${kept > 0.004 ? ' · بقي في الحساب ' + fmtRaw(kept) + ' (حدود القاصرين)' : ''}`, 'ok', 7000); });
+    estDistAuto(id);
+};
+
+/* ---------- (٣) المعاشات والمستحقات ---------- */
+const PEN_KINDS = ['معاش', 'راتب', 'مصاريف وفاة', 'مستحقات مالية للمتوفى', 'أخرى'];
+const penMonthly = s => +s.monthly > 0;
+function penEnt(s, b) {
+    const share = +b.share || 0, from = b.from || s.start || '0000-01-01', t = todayStr();
+    if (!penMonthly(s)) return round2((+s.total || 0) * share);
+    const eom = eomOf(t), until = b.to && b.to < eom ? b.to : eom; if (until < from) return 0;
+    let y = +from.slice(0, 4), m = +from.slice(5, 7), tot = 0; const uy = +until.slice(0, 4), um = +until.slice(5, 7);
+    while (y < uy || (y === uy && m <= um)) {
+        const ms = `${y}-${pad(m)}-01`, me = `${y}-${pad(m)}-${pad(dim(y, m))}`, a = from > ms ? from : ms, z = until < me ? until : me;
+        tot += s.monthly * share * (daysBetween(a, z) + 1) / dim(y, m); m++; if (m > 12) { m = 1; y++; }
+    }
+    return round2(tot);
+}
+function penRows(s) {
+    return (s.bens || []).map(b => {
+        const rc = (s.recs || []).filter(r => r.benId === b.id), recv = sumBy(rc.filter(r => r.kind === 'received'), r => r.amount), counted = sumBy(rc.filter(r => r.kind === 'counted'), r => r.amount);
+        const held = penMonthly(s) && b.to ? sumBy(rc.filter(r => r.kind === 'received' && r.date > b.to), r => r.amount) : 0, ent = penEnt(s, b);
+        return { b, ent, recv, counted, held, left: round2(ent - (recv - held) - counted) };
+    });
+}
+const penHeld = (e, cur) => round2((e.pens || []).filter(s => s.cur === cur).reduce((t, s) => t + penRows(s).reduce((x, r) => x + r.held, 0), 0));
+estCalc = function (e, cur) {
+    const liq = round2((estLiquid(e)[cur] || []).reduce((s, x) => s + x.bal, 0)), held = penHeld(e, cur);
+    const unpaid = round2((e.liabs || []).filter(l => !l.paid && l.cur === cur).reduce((s, l) => s + liabRem(l), 0));
+    const distributed = round2((e.dist || []).filter(d => d.cur === cur).reduce((s, d) => s + d.total, 0));
+    const base = round2(liq + distributed - unpaid), avail = round2(Math.max(0, liq - unpaid - held));
+    const sum = (e.heirs || []).reduce((s, h) => s + (+h.share || 0), 0);
+    const rows = (e.heirs || []).map(h => { const ent = round2(base * (+h.share || 0)), rec = round2((e.dist || []).filter(d => d.cur === cur).reduce((s, d) => s + ((d.items.find(i => i.heirId === h.id) || {}).amount || 0), 0)); return { h, ent, rec, left: round2(ent - rec) }; });
+    return { liq, unpaid, distributed, base, avail, sum, rows, held };
+};
+const penOf = (e, sid) => (e.pens || []).find(x => x.id === sid);
+function penStreamModal(id, sid) {
+    const e = estOf(id), s = sid ? penOf(e, sid) : null;
+    dynModal(s ? '✏️ بيانات المصدر' : '＋ مصدر معاش / مستحق', `<p class="eq-hint">المعاش والمصاريف ليست ميراثاً: لها مستفيدون ونسب خاصة بنظام الجهة، تُحدَّد لكل مصدر على حدة.</p>
+      ${fld('ps-k', 'النوع', `<select id="ps-k" class="input-field">${optList(PEN_KINDS, s && s.kind)}</select>`)}${fld('ps-n', 'الجهة / الوصف', `<input id="ps-n" class="input-field" placeholder="مثال: هيئة التقاعد — بنك فلسطين" value="${esc(s ? s.name || '' : '')}">`)}
+      ${fld('ps-c', 'العملة', `<select id="ps-c" class="input-field">${optList(appData.currencies, (s && s.cur) || zkSet().cur)}</select>`)}
+      ${fld('ps-m', 'القيمة الشهرية الإجمالية (للمعاش/الراتب المتكرر) — اتركه 0 إن كان دفعة واحدة', `<input id="ps-m" type="number" step="0.01" class="input-field" value="${s ? s.monthly || 0 : 0}">`)}
+      ${fld('ps-t', 'المبلغ الإجمالي (للدفعة الواحدة: مصاريف وفاة، مستحقات...)', `<input id="ps-t" type="number" step="0.01" class="input-field" value="${s ? s.total || 0 : 0}">`)}
+      ${fld('ps-s', 'تاريخ بداية الاستحقاق (غالباً تاريخ الوفاة)', `<input id="ps-s" type="date" class="input-field" value="${esc((s && s.start) || e.deathDate || '')}">`)}`, 'حفظ', () => {
+        const m = parseFloat($('ps-m').value) || 0, t = parseFloat($('ps-t').value) || 0; if (!(m > 0 || t > 0)) { toast('أدخل قيمة شهرية أو مبلغاً إجمالياً', 'err'); return false; }
+        const o = { kind: $('ps-k').value, name: $('ps-n').value.trim(), cur: $('ps-c').value, monthly: m, total: m > 0 ? 0 : t, start: $('ps-s').value };
+        if (s) Object.assign(s, o); else (e.pens = e.pens || []).push(Object.assign({ id: 'p' + uid(), bens: [], recs: [] }, o)); saveData(); });
+}
+function penStreamDel(id, sid) { if (!confirm('حذف هذا المصدر وجدوله؟ (الإيداعات المسجّلة تبقى في السجل المالي)')) return; const e = estOf(id); e.pens = e.pens.filter(x => x.id !== sid); saveData(); }
+function penBenModal(id, sid, bid) {
+    const e = estOf(id), s = penOf(e, sid), b = bid ? s.bens.find(x => x.id === bid) : null;
+    dynModal(b ? '✏️ مستفيد' : '＋ مستفيد من «' + esc(s.kind) + '»', `${fld('pb-o', 'المستفيد (حساب في البرنامج)', `<select id="pb-o" class="input-field">${optList(zkOwners().filter(n => n !== e.deceased), b && b.owner)}</select>`)}
+      ${fld('pb-r', 'صلة القرابة', `<input id="pb-r" class="input-field" placeholder="ابنة، ابن ابنة، زوجة..." value="${esc(b ? b.relation || '' : '')}">`)}
+      ${fld('pb-sh', 'نسبته من هذا المصدر (كسر عشري، مثل 0.5 أو 1)', `<input id="pb-sh" type="number" step="0.000001" class="input-field" value="${b ? b.share : ''}">`)}
+      ${fld('pb-acc', 'حساب الاستلام', `<select id="pb-acc" class="input-field">${optList(accNames(), b && b.account)}</select>`)}
+      ${fld('pb-f', 'بداية استحقاقه', `<input id="pb-f" type="date" class="input-field" value="${esc((b && b.from) || s.start || '')}">`)}
+      ${fld('pb-t', 'نهاية استحقاقه (اتركها فارغة إن كان مستمراً) — مثل تاريخ الزواج', `<input id="pb-t" type="date" class="input-field" value="${esc((b && b.to) || '')}">`)}
+      ${fld('pb-e', 'سبب الانتهاء', `<input id="pb-e" class="input-field" placeholder="زواج، بلوغ سن، ..." value="${esc((b && b.endReason) || '')}">`)}`, 'حفظ', () => {
+        const sh = parseFloat($('pb-sh').value); if (!(sh > 0 && sh <= 1)) { toast('النسبة بين 0 و1', 'err'); return false; }
+        const f = $('pb-f').value, t = $('pb-t').value; if (t && f && t < f) { toast('النهاية قبل البداية', 'err'); return false; }
+        const o = { id: b ? b.id : 'b' + uid(), owner: $('pb-o').value, relation: $('pb-r').value.trim(), share: sh, account: $('pb-acc').value, from: f, to: t, endReason: $('pb-e').value.trim() };
+        if (!b && s.bens.some(x => x.owner === o.owner)) { toast('مضاف مسبقاً في هذا المصدر', 'err'); return false; }
+        if (b) Object.assign(b, o); else s.bens.push(o); saveData(); });
+}
+function penBenDel(id, sid, bid) { if (!confirm('حذف المستفيد من هذا المصدر؟ (دفعاته المسجّلة تبقى في الجدول وفي السجل المالي)')) return; const s = penOf(estOf(id), sid); s.bens = s.bens.filter(b => b.id !== bid); saveData(); }
+function penCopyHeirs(id, sid) {
+    const e = estOf(id), s = penOf(e, sid); if (s.bens.length && !confirm('ستُضاف الورثة غير الموجودين في القائمة بأنصبتهم الشرعية. متابعة؟')) return;
+    e.heirs.forEach(h => { if (!s.bens.some(b => b.owner === h.owner)) s.bens.push({ id: 'b' + uid(), owner: h.owner, relation: h.relation || '', share: +h.share, account: h.account, from: s.start || '', to: '', endReason: '' }); }); saveData();
+}
+// توزيع دفعة حسب النسب: من بدأ استحقاقه يأخذ نسبته؛ من انتهى استحقاقه يُحتسب ما صُرف له «غير مستحق محجوز»
+function penAlloc(s, date, amount) {
+    const bens = s.bens.filter(b => !b.from || b.from <= date); let used = 0;
+    return bens.map((b, i) => { const a = round2(amount * (+b.share || 0)); used += a; return { b, amt: a, held: penMonthly(s) && !!b.to && date > b.to }; }).filter(x => x.amt > 0);
+}
+function penRecvPreview(id, sid) {
+    const e = estOf(id), s = penOf(e, sid), p = $('pr-prev'); if (!p) return; const mode = $('pr-mode').value; $('pr-ben-w').style.display = mode === 'split' ? 'none' : '';
+    if (mode !== 'split') { p.innerHTML = ''; return; }
+    const al = penAlloc(s, $('pr-d').value || todayStr(), parseFloat($('pr-a').value) || 0), sh = s.bens.reduce((t, b) => t + (+b.share || 0), 0);
+    p.innerHTML = al.map(x => `<div class="flex justify-between"><span>${esc(x.b.owner)} — ${(+x.b.share).toFixed(4)}${x.held ? ' <span class="text-amber-700 font-bold">⛔ انتهى استحقاقه: يُحجز</span>' : ''}</span><b>${fmt(x.amt)}</b></div>`).join('') + (Math.abs(sh - 1) > 1e-6 ? `<div class="text-amber-700">مجموع النسب ${sh.toFixed(4)} ≠ 1: الباقي غير موزَّع.</div>` : '');
+}
+function penRecvModal(id, sid) {
+    const e = estOf(id), s = penOf(e, sid); if (!s.bens.length) { toast('أضف المستفيدين أولاً', 'warn'); return; }
+    dynModal('📥 دفعة من «' + esc(s.kind) + '»', `<p class="eq-hint">سجّل ما صرفته الجهة. «توزيع حسب النسب» يودِع لكل مستفيد حصته في حسابه ويعزل تلقائياً ما صُرف لمن انتهى استحقاقه.</p>
+      ${fld('pr-mode', 'طريقة التسجيل', `<select id="pr-mode" class="input-field" onchange="penRecvPreview('${id}','${sid}')"><option value="split">توزيع حسب نسب المستفيدين</option><option value="direct">صُرفت لمستفيد واحد فعلياً</option><option value="counted">محتسَبة من الجهة لكنها لم تُستلم (مثل رواتب صُرفت بعد الوفاة وحساب مقفل)</option></select>`)}
+      ${fld('pr-a', 'المبلغ (' + esc(s.cur) + ')', `<input id="pr-a" type="number" step="0.01" class="input-field" value="${s.monthly || ''}" oninput="penRecvPreview('${id}','${sid}')">`)}${fld('pr-d', 'تاريخ الصرف', `<input id="pr-d" type="date" class="input-field" value="${todayStr()}" onchange="penRecvPreview('${id}','${sid}')">`)}
+      <div id="pr-ben-w" style="display:none">${fld('pr-b', 'المستفيد', `<select id="pr-b" class="input-field">${s.bens.map(b => `<option value="${b.id}">${esc(b.owner)}</option>`).join('')}</select>`)}</div>
+      ${fld('pr-n', 'ملاحظة', `<input id="pr-n" class="input-field">`)}<div id="pr-prev" class="text-xs space-y-1 bg-slate-50 rounded-xl p-3"></div>`, 'تسجيل', () => {
+        const a = round2(parseFloat($('pr-a').value)), d = $('pr-d').value || todayStr(), mode = $('pr-mode').value, note = $('pr-n').value.trim(); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        const dep = (b, amt) => { if (!b.account) { toast('حدّد حساب الاستلام للمستفيد ' + b.owner, 'err'); return null; } return mkTx({ type: 'إيداع', amount: amt, currency: s.cur, account: b.account, owner: b.owner, date: d, party: `${s.kind}: ${s.name || e.deceased}`, notes: note || ('تركة ' + e.deceased), tags: ['معاش'] }); };
+        s.recs = s.recs || [];
+        if (mode === 'split') {
+            const al = penAlloc(s, d, a); if (!al.length) { toast('لا مستفيد مستحق في هذا التاريخ', 'err'); return false; }
+            const txs = []; for (const x of al) { const t = dep(x.b, x.amt); if (!t) { txs.forEach(q => appData.transactions.splice(appData.transactions.indexOf(q), 1)); return false; } txs.push(t); }
+            al.forEach((x, i) => s.recs.push({ id: 'r' + uid(), date: d, amount: x.amt, kind: 'received', benId: x.b.id, txId: txs[i].id, note }));
+        } else {
+            const b = s.bens.find(x => x.id === $('pr-b').value); if (!b) return false;
+            if (mode === 'counted') s.recs.push({ id: 'r' + uid(), date: d, amount: a, kind: 'counted', benId: b.id, txId: null, note });
+            else { const t = dep(b, a); if (!t) return false; s.recs.push({ id: 'r' + uid(), date: d, amount: a, kind: 'received', benId: b.id, txId: t.id, note }); }
+        }
+        saveData(); });
+    penRecvPreview(id, sid);
+}
+function penRecDel(id, sid, rid) {
+    if (!confirm('حذف هذه الدفعة؟ (يُحذف إيداعها من حساب المستفيد إن وُجد)')) return;
+    const s = penOf(estOf(id), sid), r = s.recs.find(x => x.id === rid); if (r && r.txId) [appData.transactions, archived].forEach(a => { const i = a.findIndex(t => String(t.id) === String(r.txId)); if (i >= 0) a.splice(i, 1); });
+    s.recs = s.recs.filter(x => x.id !== rid); saveData();
+}
+function penOwnersData(e) {
+    const m = {}; (e.pens || []).forEach(s => penRows(s).forEach(r => { const k = r.b.owner + '|' + s.cur, o = m[k] = m[k] || { owner: r.b.owner, cur: s.cur, ent: 0, counted: 0, recv: 0, held: 0, left: 0, parts: [] }; o.ent += r.ent; o.counted += r.counted; o.recv += r.recv; o.held += r.held; o.left += r.left; o.parts.push(s.kind); }));
+    return Object.values(m).map(o => Object.assign(o, { ent: round2(o.ent), counted: round2(o.counted), recv: round2(o.recv), held: round2(o.held), left: round2(o.left) }));
+}
+function penHtml(e) {
+    const P = e.pens || [], cur0 = Object.keys(estLiquid(e))[0];
+    let h = `<div class="border-2 border-indigo-300 rounded-2xl p-3 space-y-3"><div class="flex justify-between items-center gap-2"><b class="text-sm">🧾 المعاشات والمستحقات (ليست ميراثاً)</b><button class="btn-primary text-xs px-3 py-1.5" onclick="penStreamModal('${e.id}')">＋ مصدر</button></div>
+      <p class="eq-hint">لكل مصدر (معاش، راتب، مصاريف وفاة، مستحقات المتوفى) مستفيدوه ونسبهم وتواريخ استحقاقهم. يُحسب المستحق بالأيام، ويُحتسب الشهر الجاري كاملاً. ما يُصرف بعد انتهاء الاستحقاق يُعزل «غير مستحق — محجوز» ويُخصم من المتاح للتوزيع.</p>`;
+    h += P.length ? P.map(s => {
+        const R = penRows(s);
+        return `<div class="border rounded-xl p-2 space-y-2 bg-white"><div class="flex flex-wrap items-center justify-between gap-2"><b class="text-sm">${esc(s.kind)} ${s.name ? '— ' + esc(s.name) : ''} <span class="text-xs text-slate-500">${penMonthly(s) ? 'شهرياً ' + fmt(s.monthly) : 'دفعة ' + fmt(s.total)} ${esc(s.cur)} · من ${esc(s.start || '—')}</span></b>
+          <span class="flex flex-wrap gap-1"><button class="btn-primary text-[11px] px-2 py-1" onclick="penRecvModal('${e.id}','${s.id}')">📥 دفعة</button><button class="btn-secondary text-[11px] px-2 py-1" onclick="penBenModal('${e.id}','${s.id}')">＋ مستفيد</button><button class="btn-secondary text-[11px] px-2 py-1" onclick="penCopyHeirs('${e.id}','${s.id}')">👪 الورثة</button><button class="px-2 py-1 bg-slate-100 rounded-lg text-[11px]" onclick="penStreamModal('${e.id}','${s.id}')">✏️</button><button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg text-[11px]" onclick="penStreamDel('${e.id}','${s.id}')">🗑️</button></span></div>
+          <div class="overflow-x-auto"><table class="text-xs"><thead><tr><th>المستفيد</th><th>النسبة</th><th>من ← إلى</th><th>يستحق</th><th>محتسَب</th><th>استلم</th><th>غير مستحق (محجوز)</th><th>المتبقي له</th><th></th></tr></thead><tbody>${R.map(r => `<tr><td><b>${esc(r.b.owner)}</b><div class="text-[10px] text-slate-500">${esc(r.b.relation || '')}</div></td><td>${(+r.b.share).toFixed(4)}</td><td>${esc(r.b.from || '—')} ← ${r.b.to ? esc(r.b.to) + (r.b.endReason ? ' (' + esc(r.b.endReason) + ')' : '') : 'مستمر'}</td><td>${fmt(r.ent)}</td><td>${fmt(r.counted)}</td><td>${fmt(r.recv)}</td><td class="${r.held > 0 ? 'text-amber-700 font-bold' : ''}">${fmt(r.held)}</td><td><b class="${r.left < -0.004 ? 'text-rose-700' : ''}">${fmt(r.left)}</b></td><td class="whitespace-nowrap"><button onclick="penBenModal('${e.id}','${s.id}','${r.b.id}')" class="px-2 py-1 bg-slate-100 rounded-lg">✏️</button> <button onclick="penBenDel('${e.id}','${s.id}','${r.b.id}')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg">🗑️</button></td></tr>`).join('') || '<tr><td colspan="9" class="text-center text-slate-400 py-2">أضف المستفيدين</td></tr>'}</tbody></table></div>
+          ${(s.recs || []).length ? `<details class="text-xs"><summary class="cursor-pointer font-bold">سجل الدفعات (${s.recs.length})</summary>${[...s.recs].sort((a, b) => b.date.localeCompare(a.date)).map(r => { const b = s.bens.find(x => x.id === r.benId) || {}; return `<div class="flex justify-between items-center py-1 border-b"><span>${esc(r.date)} · ${esc(b.owner || '؟')} · ${r.kind === 'counted' ? '<span class="text-amber-700">محتسَبة لم تُستلم</span>' : (penMonthly(s) && b.to && r.date > b.to ? '<span class="text-amber-700">بعد انتهاء الاستحقاق</span>' : 'مستلمة')} ${esc(r.note || '')}</span><span><b>${fmt(r.amount)}</b> <button onclick="penRecDel('${e.id}','${s.id}','${r.id}')" class="text-rose-600 px-1">↩️</button></span></div>`; }).join('')}</details>` : ''}</div>`;
+    }).join('') : '<div class="text-xs text-slate-400">لا مصادر مسجّلة بعد.</div>';
+    const O = penOwnersData(e);
+    if (O.length) h += `<details class="text-xs" open><summary class="cursor-pointer font-bold text-sm">📇 مستحقات كل صاحب حساب (مجمّعة)</summary><div class="overflow-x-auto"><table class="text-xs"><thead><tr><th>صاحب الحساب</th><th>المصادر</th><th>يستحق</th><th>محتسَب</th><th>استلم</th><th>محجوز</th><th>المتبقي</th></tr></thead><tbody>${O.map(o => `<tr><td><b>${esc(o.owner)}</b></td><td>${esc([...new Set(o.parts)].join('، '))}</td><td>${fmt(o.ent)} ${esc(o.cur)}</td><td>${fmt(o.counted)}</td><td>${fmt(o.recv)}</td><td class="${o.held > 0 ? 'text-amber-700 font-bold' : ''}">${fmt(o.held)}</td><td><b>${fmt(o.left)}</b></td></tr>`).join('')}</tbody></table></div></details>`;
+    const am = (e.liabs || []).filter(l => l.kind === 'أمانة');
+    if (am.length) h += `<div class="border rounded-xl p-2 text-xs space-y-1"><b>🔐 الأمانات عند المتوفى (لا تدخل في التركة)</b>${am.map(l => `<div class="flex justify-between"><span>${esc(l.desc || 'أمانة')}${l.toUser ? ' ← ' + esc(l.toUser) : ''}</span><span>الإجمالي ${fmt(l.amount)} · سُلّم ${fmt(l.paidAmt || 0)} · <b>المتبقي ${fmt(liabRem(l))} ${esc(l.cur)}</b></span></div>`).join('')}</div>`;
+    return h + '</div>';
+}
+function penReportText(e) {
+    const L = []; if (!(e.pens || []).length) return '';
+    L.push('', 'المعاشات والمستحقات:');
+    e.pens.forEach(s => { L.push(`• ${s.kind} ${s.name || ''} (${penMonthly(s) ? 'شهرياً ' + fmtRaw(s.monthly) : 'دفعة ' + fmtRaw(s.total)} ${s.cur}) من ${s.start || '—'}`); penRows(s).forEach(r => L.push(`   - ${r.b.owner} (${r.b.relation || ''}) نسبة ${(+r.b.share).toFixed(4)} ${r.b.from || ''} ← ${r.b.to || 'مستمر'}${r.b.endReason ? ' [' + r.b.endReason + ']' : ''}: يستحق ${fmtRaw(r.ent)} · محتسَب ${fmtRaw(r.counted)} · استلم ${fmtRaw(r.recv)} · غير مستحق محجوز ${fmtRaw(r.held)} · المتبقي ${fmtRaw(r.left)}`)); });
+    const am = (e.liabs || []).filter(l => l.kind === 'أمانة'); if (am.length) { L.push('', 'الأمانات:'); am.forEach(l => L.push(`• ${l.desc || 'أمانة'}: الإجمالي ${fmtRaw(l.amount)} · سُلّم ${fmtRaw(l.paidAmt || 0)} · المتبقي ${fmtRaw(liabRem(l))} ${l.cur}`)); }
+    return L.join('\n');
+}
+const _estReport22 = estReport;
+estReport = function (id) { _estReport22.apply(this, arguments); const t = $('er-txt'), x = penReportText(estOf(id)); if (t && x) t.value += '\n' + x; };
+
+/* ---------- (٤) ربط الواجهة ---------- */
+const _estCard22 = estCard;
+estCard = function (e) {
+    if (!estAccessible(e)) return '';
+    let h = _estCard22.apply(this, arguments);
+    const locked = estLocked(e) && !WS();
+    if (INH.open[e.id]) {
+        let pens = penHtml(e); if (locked) pens = pens.replace(/<button /g, '<button disabled ');
+        h = h.replace('<div class="border-2 border-emerald-300', pens + '<div class="border-2 border-emerald-300');
+        if (isMain() && !WS()) h = h.replace(/(<button class="btn-secondary text-xs px-3 py-2" onclick="estReport)/, `<button class="btn-secondary text-xs px-3 py-2" onclick="estManagersModal('${e.id}')">👥 من يديرها</button>$1`);
+        const C = estCalc(e, e.view || Object.keys(estLiquid(e))[0] || appData.currencies[0]);
+        if (C.held > 0) h = h.replace('<div class="text-xs text-slate-600">المتاح للتوزيع الآن', `<div class="text-xs text-amber-700 font-bold">🔒 محجوز احتياطاً لخصم الجهة: ${fmt(C.held)} (مخصوم من المتاح)</div><div class="text-xs text-slate-600">المتاح للتوزيع الآن`);
+    }
+    if (e.workspace && !estLocked(e) && !WS()) h = h.replace('<div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center text-sm">', `<div class="text-xs bg-amber-50 border border-amber-300 rounded-xl p-2 flex flex-wrap items-center justify-between gap-2"><span>📦 ${e.workspace.unlinked ? 'فُكّ الربط بالمساحة' : 'أُنشئت مساحة مستقلة ولم يُستورد منها تحديث بعد'} — ما تسجله هنا لن يصل المساحة، وستُقفل التركة عندك عند استيراد أول تحديث.</span><button class="px-2 py-1 bg-white border rounded-lg" onclick="event.stopPropagation();estCancelWs('${e.id}')">إلغاء المساحة</button></div><div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center text-sm">`);
+    return h;
+};
+
+/* =====================================================================
+   v7.10 — سجل تسديد الالتزامات، وصف الوارد، حذف الزكاة، حذف مستفيد بدفعاته، سلة التركات
+   ===================================================================== */
+const delTxById = id => { if (id == null) return; [appData.transactions, archived].forEach(a => { const i = a.findIndex(t => String(t.id) === String(id)); if (i >= 0) a.splice(i, 1); }); };
+
+/* ---------- (١) سجل تسديد الالتزامات + استرجاع الدفعة ---------- */
+function liabPayUndo(id, lid, pi) {
+    const e = estOf(id), l = (e.liabs || []).find(x => x.id === lid), p = l && (l.pays || [])[pi]; if (!p) return;
+    if (!confirm(`استرجاع دفعة ${fmtRaw(p.amount)} بتاريخ ${p.date}؟ تُحذف حركتها ويعود المبلغ إلى حساب المتوفى (وإلى الالتزام كمتبقٍّ).`)) return;
+    delTxById(p.txId); l.pays.splice(pi, 1); l.paidAmt = round2(Math.max(0, (+l.paidAmt || 0) - p.amount)); l.paid = liabRem(l) <= 0.004; saveData(); toast('استُرجعت الدفعة', 'ok');
+}
+function liabLogHtml(e) {
+    const L = (e.liabs || []).filter(l => (l.pays || []).length); if (!L.length) return '';
+    return `<details class="border rounded-xl p-2 text-xs" open><summary class="cursor-pointer font-bold text-sm">🧾 سجل تسديد الالتزامات</summary>${L.map(l => `<div class="mt-1"><b>${esc(l.kind)} — ${esc(l.desc || '')}</b> <span class="text-slate-500">(${fmt(l.amount)} ${esc(l.cur)} · سُدِّد ${fmt(l.paidAmt || 0)} · المتبقي ${fmt(liabRem(l))})</span>${l.pays.map((p, i) => `<div class="flex justify-between items-center py-1 border-b"><span>${esc(p.date)}</span><span><b>${fmt(p.amount)}</b> <button class="text-rose-600 px-1" title="استرجاع الدفعة" onclick="liabPayUndo('${e.id}','${l.id}',${i})">↩️ استرجاع</button></span></div>`).join('')}</div>`).join('')}</details>`;
+}
+
+/* ---------- (٢) وصف للوارد ---------- */
+estIncomeModal = function (id) {
+    const e = estOf(id); dynModal('＋ وارد للتركة', `<p class="eq-hint">يُسجَّل كإيداع في حساب المتوفى (معاش، راتب مستحق، تعويض، تأمين...) ثم تُوزّعه على الورثة.</p>
+      ${fld('ei-k', 'النوع', `<select id="ei-k" class="input-field"><option>معاش</option><option>راتب</option><option>تأمين</option><option>تعويض</option><option>أخرى</option></select>`)}
+      ${fld('ei-n', 'الوصف', `<input id="ei-n" class="input-field" placeholder="مثال: راتب الشهر الأول بعد الوفاة">`)}
+      ${fld('ei-a', 'المبلغ', `<input id="ei-a" type="number" step="0.01" class="input-field">`)}${fld('ei-c', 'العملة', `<select id="ei-c" class="input-field">${optList(appData.currencies, zkSet().cur)}</select>`)}
+      ${fld('ei-acc', 'إلى حساب المتوفى', `<select id="ei-acc" class="input-field">${optList(accNames())}</select>`)}${fld('ei-d', 'التاريخ', `<input id="ei-d" type="date" class="input-field" value="${todayStr()}">`)}`, 'تسجيل', () => {
+        const a = parseFloat($('ei-a').value); if (!(a > 0)) { toast('أدخل المبلغ', 'err'); return false; }
+        const n = $('ei-n').value.trim();
+        mkTx({ type: 'إيداع', amount: a, currency: $('ei-c').value, account: $('ei-acc').value, owner: e.deceased, date: $('ei-d').value || todayStr(), party: 'وارد تركة: ' + $('ei-k').value + (n ? ' — ' + n : ''), notes: n || ('تركة ' + e.deceased), tags: ['تركة'] }); saveData(); });
+};
+
+/* ---------- (٣) سجل الزكاة المُخرَجة + حذف ---------- */
+function zkPayDel(pid) {
+    const D = zkData(), i = D.paid.findIndex(p => p.id === pid), p = D.paid[i]; if (!p) return;
+    if (!confirm(`حذف دفعة الزكاة ${fmtRaw(p.amount)} ${p.cur} (${p.date})؟ تُحذف حركة الصرف ويعود المبلغ لحسابه.`)) return;
+    delTxById(p.txId); D.paid.splice(i, 1);
+    if (D.cycle[p.owner] && D.cycle[p.owner].from === p.hawlDue) delete D.cycle[p.owner];   // الحول لم يعد مُستوفى
+    saveData(); toast('حُذفت دفعة الزكاة', 'ok');
+}
+const _renderZakat23 = renderZakat;
+renderZakat = function () {
+    _renderZakat23.apply(this, arguments); const box = $('inh-content'), P = zkData().paid.filter(p => isMain() || p.owner === currentUser); if (!box || !P.length) return;
+    const d = document.createElement('div'); d.className = 'card p-5 space-y-2';
+    d.innerHTML = `<h3 class="text-base font-black text-slate-800">📒 سجل الزكاة المُخرَجة</h3>${[...P].sort((a, b) => b.date.localeCompare(a.date)).map(p => `<div class="flex flex-wrap justify-between items-center text-xs border-b py-1.5"><span><b>${esc(p.owner)}</b> · ${esc(p.date)} · عن حول ${esc(p.hawlDue || '—')} ${p.note ? '· ' + esc(p.note) : ''}</span><span><b>${fmt(p.amount)} ${esc(p.cur)}</b> <button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg" onclick="zkPayDel('${p.id}')">🗑️ حذف / استرداد</button></span></div>`).join('')}`;
+    box.appendChild(d);
+};
+
+/* ---------- (٤) حذف مستفيد له دفعات ---------- */
+const _penAlloc23 = penAlloc;
+penAlloc = function (s, date, amount) { const keep = s.bens; s = Object.assign({}, s, { bens: keep.filter(b => !b.archived) }); return _penAlloc23(s, date, amount); };
+penBenDel = function (id, sid, bid) {
+    const e = estOf(id), s = penOf(e, sid), b = s.bens.find(x => x.id === bid), rc = (s.recs || []).filter(r => r.benId === bid);
+    if (!rc.length) { if (!confirm('حذف المستفيد؟')) return; s.bens = s.bens.filter(x => x.id !== bid); saveData(); return; }
+    const tot = sumBy(rc, r => r.amount);
+    if (confirm(`«${b.owner}» له ${rc.length} دفعة (${fmtRaw(tot)}).\n\nموافق = حذف المستفيد مع كل دفعاته (تُحذف إيداعاتها من حسابه وتُستبعد من الحسابات).\nإلغاء = خيار آخر.`)) {
+        rc.forEach(r => delTxById(r.txId)); s.recs = s.recs.filter(r => r.benId !== bid); s.bens = s.bens.filter(x => x.id !== bid); saveData(); toast('حُذف المستفيد ودفعاته', 'ok'); return;
+    }
+    if (confirm('هل تريد بدلاً من ذلك «أرشفة» المستفيد؟\nيبقى في الكشف ودفعاته محسوبة، ولا يدخل في توزيع الدفعات الجديدة.')) {
+        b.archived = true; if (!b.to) b.to = todayStr(); if (!b.endReason) b.endReason = 'مؤرشف'; saveData(); toast('أُرشف المستفيد', 'ok');
+    }
+};
+
+/* ---------- (٥) سلة التركات (استرجاع للمدير) ---------- */
+estDelete = function (id) {
+    const e = estOf(id); if (!confirm('حذف سجل التركة؟ تنتقل إلى «التركات المحذوفة» ويستطيع مدير النظام استرجاعها. (حركات التوزيع تبقى في السجل المالي)')) return;
+    (appData.estatesTrash = appData.estatesTrash || []).push({ estate: e, by: (typeof REAL !== 'undefined' && REAL.name) || currentUser, at: new Date().toISOString() });
+    appData.estates = estData().filter(x => x.id !== id); saveData();
+};
+function estRestore(i) { const T = appData.estatesTrash || [], it = T[i]; if (!it) return; if (estData().some(x => x.id === it.estate.id)) { toast('توجد تركة بنفس المعرّف', 'err'); return; } estData().push(it.estate); T.splice(i, 1); saveData(); toast('استُرجعت التركة ✅', 'ok'); }
+function estPurge(i) { if (!confirm('حذف نهائي لا رجعة فيه؟')) return; (appData.estatesTrash || []).splice(i, 1); saveData(); }
+const _renderEstates23 = renderEstates;
+renderEstates = function () {
+    _renderEstates23.apply(this, arguments); const box = $('inh-content'), T = appData.estatesTrash || []; if (!box || !isMain() || WS() || !T.length) return;
+    const d = document.createElement('div'); d.className = 'card p-4 space-y-2 border-2 border-dashed border-rose-300';
+    d.innerHTML = `<b class="text-sm">🗑️ التركات المحذوفة (${T.length})</b>${T.map((it, i) => `<div class="flex flex-wrap justify-between items-center text-xs border-b py-1.5"><span>تركة <b>${esc(it.estate.deceased)}</b> · حذفها ${esc(it.by || '؟')} · ${esc((it.at || '').slice(0, 10))}</span><span class="flex gap-1"><button class="btn-primary px-2 py-1" onclick="estRestore(${i})">↩️ استرجاع</button><button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg" onclick="estPurge(${i})">حذف نهائي</button></span></div>`).join('')}`;
+    box.appendChild(d);
+};
+
+/* سجل التسديد داخل بطاقة التركة */
+const _estCard23 = estCard;
+estCard = function (e) {
+    let h = _estCard23.apply(this, arguments); if (!h || !INH.open[e.id]) return h;
+    let log = liabLogHtml(e); if (!log) return h; if (estLocked(e) && !WS()) log = log.replace(/<button /g, '<button disabled ');
+    return h.replace('<div class="border-2 border-emerald-300', log + '<div class="border-2 border-emerald-300');
+};
+
+/* ---------- سجل الواردات داخل الأصول ---------- */
+const findTxAny = id => [appData.transactions, archived].reduce((r, a) => r || a.find(t => String(t.id) === String(id)), null);
+function assetDate(a) { if (a.receivedDate) return a.receivedDate; const t = a.txId && findTxAny(a.txId); return t ? t.date : ''; }
+function estIncomeRows(e) { return appData.transactions.filter(t => t.type === 'إيداع' && t.owner === e.deceased && (t.tags || []).includes('تركة')).sort((a, b) => (b.date || '').localeCompare(a.date || '')); }
+function incomeLogHtml(e) {
+    const R = estIncomeRows(e);
+    return `<div class="border-t pt-2 mt-2"><b class="text-xs">📥 سجل الواردات والإضافات (${R.length})</b>${R.length ? R.map(t => `<div class="flex justify-between items-center text-xs py-1 border-b"><span>${esc(t.date)} · ${esc((t.party || '').replace(/^(وارد )?تركة: /, '')) || 'وارد'}${t.notes && t.notes !== 'تركة ' + e.deceased ? ' — ' + esc(t.notes) : ''} · ${esc(t.account)}</span><span><b>${fmt(t.amount)} ${esc(t.currency)}</b> <button class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg" title="حذف الوارد" onclick="estIncomeDel('${e.id}','${t.id}')">🗑️</button></span></div>`).join('') : '<div class="text-xs text-slate-400 py-1">لا واردات مسجّلة.</div>'}</div>`;
+}
+function estIncomeDel(id, txId) {
+    const e = estOf(id), t = findTxAny(txId); if (!t) return;
+    if (!confirm(`حذف وارد ${fmtRaw(t.amount)} ${t.currency} بتاريخ ${t.date}؟ يُخصم من حساب المتوفى${(e.assets || []).some(a => String(a.txId) === String(txId)) ? ' ويعود الأصل المرتبط به إلى «مستحق»' : ''}.`)) return;
+    delTxById(txId); (e.assets || []).forEach(a => { if (String(a.txId) === String(txId)) { a.received = false; delete a.receivedDate; delete a.txId; } });
+    saveData(); toast('حُذف الوارد', 'ok');
+}
+
 /* ---------- التشغيل ---------- */
 migrate();
 Object.entries(EQ_CUR_SELECT).forEach(([p, id]) => { const el = $(id); if (el) el.addEventListener('change', () => renderEq(p)); });
@@ -8391,7 +9379,7 @@ migrateInlineImages().then(() => gcImages()).catch(() => { });
 autoRates();
 checkDuePayments(false);              // عند فتح البرنامج
 setInterval(() => checkDuePayments(true), 60 * 60 * 1000); // وكل ساعة
-setSyncStatus('off'); syncAutoResume();
+setSyncStatus("off"); /* v7.2: المزامنة اللحظية أُزيلت من الواجهة — لا استئناف تلقائي */
 document.addEventListener('visibilitychange', () => { if (!document.hidden && SYNC.cloud) cloudTick(); });
 window.addEventListener('online', () => { if (SYNC.cloud) cloudTick(); });
 ['tx-party', 'tx-category', 'tx-owner'].forEach(i => { const e = document.getElementById(i); if (e) { e.addEventListener('input', () => { try { rsvFormHint(); } catch (x) { } }); e.addEventListener('change', () => { try { rsvFormHint(); } catch (x) { } }); } });
