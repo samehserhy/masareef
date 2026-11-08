@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>برنامج المصاريف اليومي — v7.13</title>
+    <title>برنامج المصاريف اليومي — v7.16</title>
     <meta name="theme-color" content="#0d9488">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2474,6 +2474,11 @@ th { background: #f3f7f6; }
                         <label class="block mb-1.5 font-bold text-sm text-slate-700">صاحب المال / المالك</label>
                         <select id="tx-owner" class="input-field"></select>
                     </div>
+                    <div id="tx-via-wrap">
+                        <label class="block mb-1.5 font-bold text-sm text-slate-700">📲 نُفِّذت من تطبيق</label>
+                        <select id="tx-via" class="input-field"></select>
+                        <p class="eq-hint mt-1">إن أرسلها شخص آخر من تطبيقه البنكي بمالك، اخترْه ليسهل مطابقتها مع سجلاته.</p>
+                    </div>
                 </div>
 
                 <div id="transfer-account-owner-block" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 bg-teal-50/60 p-4 rounded-xl border border-teal-200">
@@ -2893,16 +2898,19 @@ th { background: #f3f7f6; }
                     </div>
 
                     <div id="budget-apply-box" class="hidden bg-teal-50/50 p-4 rounded-xl border border-teal-200 space-y-3">
-                        <h4 class="font-bold text-xs text-teal-900 border-b pb-1">التطبيق على:</h4>
+                        <div>
+                            <label class="block mb-1 text-xs font-bold text-slate-700">تبدأ الفترة من تاريخ</label>
+                            <input type="date" id="budget-start" class="input-field" oninput="budgetRangePreview()">
+                            <p id="budget-range-preview" class="text-xs font-bold text-teal-800 mt-1"></p>
+                        </div>
                         <label class="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
-                            <input type="radio" name="budget-apply" value="auto" checked onchange="renderBudgetApply()">
-                            جميع الفترات القادمة تلقائياً (تجديد تلقائي)
+                            <input type="radio" name="budget-apply" value="auto" checked onchange="budgetRangePreview()">
+                            🔁 تتجدد تلقائياً (الفترة التالية تبدأ بعد انتهائها مباشرة)
                         </label>
                         <label class="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer">
-                            <input type="radio" name="budget-apply" value="specific" onchange="renderBudgetApply()">
-                            <span id="budget-specific-label">اختيار أشهر محددة</span>
+                            <input type="radio" name="budget-apply" value="once" onchange="budgetRangePreview()">
+                            فترة واحدة فقط
                         </label>
-                        <div id="budget-chips" class="hidden flex flex-wrap gap-2 pt-1"></div>
                     </div>
                     <button type="submit" class="btn-primary w-full py-3"><i class="fa-solid fa-plus"></i> حفظ السقف</button>
                 </form>
@@ -3331,6 +3339,10 @@ th { background: #f3f7f6; }
                     <label class="block mb-1 text-xs font-bold text-slate-700">اختر الحساب / المحفظة</label>
                     <select id="pay-account" class="input-field text-sm" onchange="updatePayBalance()"></select>
                 </div>
+                <div>
+                    <label class="block mb-1 text-xs font-bold text-slate-700">المبلغ المدفوع هذه المرة (عدّله إن سامحك صاحبها أو خفّض/زاد)</label>
+                    <input id="pay-amount" type="number" step="0.01" class="input-field text-sm" oninput="updatePayBalance()">
+                </div>
                 <div id="pay-balance-hint" class="text-xs font-bold text-slate-600"></div>
                 <button onclick="confirmBillPayment()" class="btn-primary w-full py-2.5 text-sm">✅ تأكيد الدفع والخصم</button>
             </div>
@@ -3452,7 +3464,7 @@ th { background: #f3f7f6; }
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.13 (النسخة · الإصدار)</div>
+    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.16 (النسخة · الإصدار)</div>
     <div id="toast-box"></div>
 
 
@@ -3568,7 +3580,7 @@ th { background: #f3f7f6; }
 /* =====================================================================
    برنامج المصاريف اليومي — الجزء 1: الأساسيات، البيانات، لوحة المتابعة، تسجيل الحركات
    ===================================================================== */
-const APP_VERSION = '7.13';
+const APP_VERSION = '7.16';
 const isNativeApp = () => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) { return false; } };
 const nativePlugin = n => { try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]) || null; } catch (e) { return null; } };
 const LS_KEY = 'my_wallet_data_v2';
@@ -3990,6 +4002,7 @@ function initDropdowns() {
     fill('global-account-filter', appData.accounts, ALL_ACC);
     ['tx-currency', 'bill-currency', 'req-currency', 'budget-currency', 'goal-currency'].forEach(fillCur);
     fill('tx-account', appData.accounts); fill('tx-owner', userNames);
+    fill('tx-via', userNames); if ($('tx-via')) $('tx-via').insertAdjacentHTML('afterbegin', '<option value="">تطبيقي (نفس صاحب المال)</option>'), $('tx-via').value = '';
     fill('tx-from-owner', userNames); fill('tx-to-owner', userNames);
     fill('tx-from-account', appData.accounts); fill('tx-to-account', appData.accounts);
     fill('tx-category', appData.categories);
@@ -4046,6 +4059,7 @@ function processTxSave(type, receipt) {
         date: $('tx-date').value, notes: $('tx-notes').value, submittedBy: currentUser
     };
     const tags = parseTags($('tx-tags') ? $('tx-tags').value : ''); if (tags.length) tx.tags = tags;
+    if ($('tx-via') && $('tx-via').value) tx.via = $('tx-via').value;
     if (receipt) tx.receiptImage = receipt;
     const ownerSel = isMain() ? $('tx-owner').value : currentUser;
     if (type === 'تحويل') {
@@ -4461,12 +4475,15 @@ function openBillModal(id) {
     const rows = [['الاسم', `<b>${esc(b.name)}</b>`], ['المبلغ', amountCell(b)], ['الفترة', PERIOD_NAMES[b.period]], ['موعد الاستحقاق', esc(dueDesc(b))],
         ['الاستحقاق الحالي', `<b>${esc(b.nextDueDate)}</b>`], ['مستحقة عن', `<b class="text-teal-700">${esc(billPeriodLabel(b, b.nextDueDate))}</b>`], ['تاريخ البدء', esc(b.startDate)], ['التصنيف', esc(b.category)],
         ['الحساب الافتراضي', esc(b.defaultAccount || '-')]];
+    if ((b.overrides || {})[b.nextDueDate] != null) rows.push(['مبلغ هذه الدفعة (معدَّل)', `<b class="text-amber-700">${fmt(b.overrides[b.nextDueDate])} ${esc(b.currency)}</b>`]);
     if (b.postponedUntil && b.postponedUntil > todayStr()) rows.push(['مؤجلة حتى', esc(b.postponedUntil)]);
     if (b.lastPaid) rows.push(['آخر دفع', esc(b.lastPaid)]);
     $('bill-modal-content').innerHTML = rows.map(r => `<div class="flex justify-between gap-3 border-b border-slate-100 py-1.5"><span class="text-slate-500">${r[0]}</span><span class="text-left">${r[1]}</span></div>`).join('') +
-        ((b.payments || []).length ? `<div class="pt-3"><div class="font-bold text-xs text-slate-700 mb-1">سجل الدفعات السابقة</div>${b.payments.slice().reverse().slice(0, 12).map(p => `<div class="flex justify-between text-xs py-1 border-b border-slate-50"><span>✅ ${esc(p.label)}</span><span class="text-slate-500">دُفعت ${esc(p.paidOn)} — ${fmt(p.amount)} ${esc(p.currency)}</span></div>`).join('')}</div>` : '');
+        ((b.payments || []).length ? `<div class="pt-3"><div class="font-bold text-xs text-slate-700 mb-1">سجل الدفعات السابقة</div>${b.payments.map((p, pi) => [p, pi]).reverse().slice(0, 12).map(([p, pi]) => `<div class="flex justify-between text-xs py-1 border-b border-slate-50"><span>${p.skipped ? '⏭️' : '✅'} ${esc(p.label)}</span><span class="text-slate-500">${p.skipped ? 'مُعفاة (تخطّيت) ' + esc(p.paidOn) + ` <button class="text-rose-600 font-bold px-1" onclick="unskipBill(${pi})">↩️ تراجع</button>` : 'دُفعت ' + esc(p.paidOn) + ' — ' + fmt(p.amount) + ' ' + esc(p.currency)}</span></div>`).join('')}</div>` : '');
     $('bill-modal-actions').innerHTML = (isMain() || b.owner === currentUser) ? `
         <button onclick="showPayForm()" class="btn-primary flex-1 py-2 text-sm">💳 دفع الآن</button>
+        <button onclick="skipBillPeriod()" class="btn-secondary text-sm">⏭️ تخطي هذه الدفعة (معفى)</button>
+        <button onclick="editBillAmount()" class="btn-secondary text-sm">✏️ تعديل المبلغ</button>
         <button onclick="postponeBill(3)" class="btn-secondary text-sm">تأجيل 3 أيام</button>
         <button onclick="postponeBill(7)" class="btn-secondary text-sm">تأجيل أسبوع</button>`
         : '<div class="text-xs text-amber-700 font-bold">الدفع من صلاحية الحساب الرئيسي.</div>';
@@ -4479,31 +4496,57 @@ function showPayForm() {
     $('pay-owner').value = (b.owner && appData.users.some(u => u.name === b.owner) && isMain()) ? b.owner : currentUser;
     $('pay-account').innerHTML = appData.accounts.map(a => `<option value="${esc(a.name)}">${esc(a.name)} (${esc(a.type)})</option>`).join('');
     if (b.defaultAccount && getAcc(b.defaultAccount)) $('pay-account').value = b.defaultAccount;
+    $('pay-amount').value = billAmountFor(b, b.nextDueDate);
     $('bill-pay-form').classList.remove('hidden'); updatePayBalance();
+}
+function billAmountFor(b, due) { const o = (b.overrides || {})[due]; return o != null ? o : b.amount; }
+function payAmt(b) { const v = parseFloat(($('pay-amount') || {}).value); return v >= 0 ? v : billAmountFor(b, b.nextDueDate); }
+function skipBillPeriod() {
+    const b = appData.bills.find(x => x.id === curBillId); if (!b) return; const due = b.nextDueDate, label = billPeriodLabel(b, due);
+    if (!confirm(`تخطي دفعة «${b.name}» عن ${label}؟ (إعفاء هذا الشهر فقط، لا تُخصم ولا تُسجَّل حركة)`)) return;
+    (b.payments = b.payments || []).push({ txId: null, skipped: true, dueDate: due, label, paidOn: todayStr(), amount: 0, currency: b.currency });
+    b.postponedUntil = ''; b.nextDueDate = nextOcc(b, due, false); b.dueDate = b.nextDueDate;
+    appData.notifications.forEach(n => { if (n.billId === b.id) n.done = true; });
+    closeBillModal(); saveData(); toast(`تم تخطي ${label}. الاستحقاق القادم: ${b.nextDueDate}`, 'ok');
+}
+function unskipBill(pi) {
+    const b = appData.bills.find(x => x.id === curBillId); if (!b) return; const p = (b.payments || [])[pi]; if (!p || !p.skipped) return;
+    if (!confirm(`التراجع عن إعفاء ${p.label}؟ تعود الدفعة مستحقة.`)) return;
+    b.payments.splice(pi, 1); if (!b.nextDueDate || p.dueDate < b.nextDueDate) b.nextDueDate = p.dueDate; b.dueDate = b.nextDueDate; b.postponedUntil = '';
+    const last = b.payments[b.payments.length - 1]; b.lastPaid = last ? last.paidOn : ''; if (!last) b.status = 'معلق';
+    saveData(); openBillModal(b.id); toast('أُلغي الإعفاء وعادت الدفعة مستحقة', 'ok');
+}
+function editBillAmount() {
+    const b = appData.bills.find(x => x.id === curBillId); if (!b) return; const due = b.nextDueDate;
+    const v = prompt(`مبلغ دفعة ${billPeriodLabel(b, due)} فقط (${b.currency}).\nالمبلغ الدائم الحالي: ${b.amount}\nاكتب المبلغ لهذه الدفعة فقط، أو اكتب «دائم:150» لتغيير المبلغ من الآن لكل الدفعات.`, String(billAmountFor(b, due)));
+    if (v == null) return; const m = String(v).trim();
+    if (m.startsWith('دائم:')) { const n = parseFloat(m.slice(5)); if (!(n > 0)) { toast('مبلغ غير صحيح', 'err'); return; } b.amount = n; }
+    else { const n = parseFloat(m); if (!(n >= 0)) { toast('مبلغ غير صحيح', 'err'); return; } (b.overrides = b.overrides || {})[due] = n; }
+    saveData(); openBillModal(b.id); toast('تم التعديل', 'ok');
 }
 function updatePayBalance() {
     const b = appData.bills.find(x => x.id === curBillId); if (!b) return;
-    const bal = getBalance($('pay-owner').value, $('pay-account').value, b.currency), el = $('pay-balance-hint');
-    el.innerHTML = `الرصيد الحالي: <span class="${bal < b.amount ? 'text-rose-600' : 'text-emerald-700'}">${fmt(bal)} ${esc(b.currency)}</span> ← بعد الدفع: ${fmt(bal - b.amount)} ${esc(b.currency)}`;
+    const amt = payAmt(b), bal = getBalance($('pay-owner').value, $('pay-account').value, b.currency), el = $('pay-balance-hint');
+    el.innerHTML = `الرصيد الحالي: <span class="${bal < amt ? 'text-rose-600' : 'text-emerald-700'}">${fmt(bal)} ${esc(b.currency)}</span> ← بعد الدفع: ${fmt(bal - amt)} ${esc(b.currency)}`;
 }
 function confirmBillPayment() {
     const b = appData.bills.find(x => x.id === curBillId); if (!b) return;
     const owner = $('pay-owner').value, accName = $('pay-account').value;
-    const bal = getBalance(owner, accName, b.currency);
-    if (bal < b.amount && !confirm(`الرصيد (${fmtRaw(bal)} ${b.currency}) أقل من المبلغ. هل تريد المتابعة؟ سيصبح الرصيد سالباً.`)) return;
-    const rid = askReserveChoiceFor({ owner, currency: b.currency, category: b.category, party: b.name, amount: b.amount }); if (rid === false) return;
-    if (!guardReserved({ owner, currency: b.currency, amount: b.amount, reserveId: rid })) return;
+    const amt = payAmt(b), bal = getBalance(owner, accName, b.currency);
+    if (bal < amt && !confirm(`الرصيد (${fmtRaw(bal)} ${b.currency}) أقل من المبلغ. هل تريد المتابعة؟ سيصبح الرصيد سالباً.`)) return;
+    const rid = askReserveChoiceFor({ owner, currency: b.currency, category: b.category, party: b.name, amount: amt }); if (rid === false) return;
+    if (!guardReserved({ owner, currency: b.currency, amount: amt, reserveId: rid })) return;
     const now = new Date(), paidFor = b.nextDueDate, label = billPeriodLabel(b, paidFor), txId = uid();
     // account.balance -= amount  (الرصيد يُحسب من الحركات، فالحركة الجديدة هي الخصم)
     const billTx = {
         id: txId, type: 'recurring_payment', accountId: (getAcc(accName) || {}).id, account: accName, owner,
-        amount: b.amount, currency: b.currency, equivalentCurrencies: b.equivalentCurrencies || {},
+        amount: amt, currency: b.currency, equivalentCurrencies: b.equivalentCurrencies || {},
         date: ymd(now), ts: now.toISOString(), bucket: 'مصاريف', category: b.category, billId: b.id, forDueDate: paidFor, periodLabel: label,
         description: `دفع دوري: ${b.name} — عن ${label}`, party: `دفع دوري: ${b.name} (${label})`, notes: '', submittedBy: currentUser
     };
     if (rid) billTx.reserveId = rid;
     appData.transactions.push(billTx); applyReserveUse(billTx);
-    (b.payments = b.payments || []).push({ txId, dueDate: paidFor, label, paidOn: ymd(now), amount: b.amount, currency: b.currency });
+    (b.payments = b.payments || []).push({ txId, dueDate: paidFor, label, paidOn: ymd(now), amount: amt, currency: b.currency });
     b.lastPaid = ymd(now); b.postponedUntil = ''; b.status = 'تم الدفع';
     b.nextDueDate = nextOcc(b, paidFor, false); b.dueDate = b.nextDueDate; // تحديث nextDueDate
     appData.notifications.forEach(n => { if (n.billId === b.id) n.done = true; });
@@ -4679,18 +4722,18 @@ function budgetBounds(period, dateStr) {
     if (period === 'شهري') return { start: `${y}-${pad(mo)}-01`, end: `${y}-${pad(mo)}-${pad(dim(y, mo))}`, index: mo };
     return { start: `${y}-01-01`, end: `${y}-12-31`, index: mo };
 }
+function budgetEndFrom(period, start) {
+    if (period === 'يومي') return start; if (period === 'أسبوعي') return addDays(start, 6);
+    const d = parseYMD(start), day = d.getDate(), add = period === 'سنوي' ? 12 : 1; let y = d.getFullYear(), m = d.getMonth() + add; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+    const nd = `${y}-${pad(m + 1)}-${pad(Math.min(day, dim(y, m + 1)))}`; return addDays(nd, -1);
+}
 function renderBudgetApply() {
-    const period = $('budget-period').value, box = $('budget-apply-box');
-    box.classList.toggle('hidden', !period); if (!period) return;
-    const kind = period === 'أسبوعي' ? 'w' : 'm';
-    if (kind !== budgetSelKind) { budgetSel = new Set(); budgetSelKind = kind; }
-    $('budget-specific-label').textContent = kind === 'w' ? 'اختيار أسابيع محددة (1–52)' : 'اختيار أشهر محددة';
-    const specific = document.querySelector('input[name="budget-apply"]:checked').value === 'specific';
-    const chips = $('budget-chips'); chips.classList.toggle('hidden', !specific);
-    if (specific) {
-        const items = kind === 'w' ? Array.from({ length: 52 }, (_, i) => [i + 1, String(i + 1)]) : MONTHS_AR.map((m, i) => [i + 1, m]);
-        chips.innerHTML = items.map(([v, l]) => `<span class="chip ${budgetSel.has(v) ? 'on' : ''}" onclick="toggleChip(${v})">${l}</span>`).join('');
-    }
+    const period = $('budget-period').value, box = $('budget-apply-box'); box.classList.toggle('hidden', !period); if (!period) return;
+    if (!$('budget-start').value) $('budget-start').value = todayStr(); budgetRangePreview();
+}
+function budgetRangePreview() {
+    const p = $('budget-period').value, st = $('budget-start').value, el = $('budget-range-preview'); if (!el) return;
+    el.textContent = p && st ? `الفترة: من ${st} إلى ${budgetEndFrom(p, st)}` + (document.querySelector('input[name="budget-apply"]:checked').value === 'auto' ? ' ثم تتجدد تلقائياً' : '') : '';
 }
 function toggleChip(v) { budgetSel.has(v) ? budgetSel.delete(v) : budgetSel.add(v); renderBudgetApply(); }
 
@@ -4699,34 +4742,43 @@ function handleSaveBudget(e) {
     const period = $('budget-period').value, amount = parseFloat($('budget-amount').value);
     if (!period) { toast('اختر الفترة أولاً', 'err'); return; }
     if (!(amount > 0)) { toast('أدخل مبلغ السقف', 'err'); return; }
-    const auto = document.querySelector('input[name="budget-apply"]:checked').value === 'auto';
-    if (!auto && !budgetSel.size) { toast('اختر شهراً أو أسبوعاً واحداً على الأقل', 'err'); return; }
-    const bd = budgetBounds(period, todayStr());
+    const auto = document.querySelector('input[name="budget-apply"]:checked').value === 'auto', st = $('budget-start').value || todayStr();
     ownMigrate();
     appData.budgets.push({
         owner: currentUser, id: uid(), category: $('budget-cat').value, amount, currency: $('budget-currency').value, equivalentCurrencies: getEq('budget'),
-        period, autoRenew: auto, appliedPeriods: auto ? [] : [...budgetSel].sort((a, b) => a - b),
-        periodStart: auto ? bd.start : null, periodEnd: auto ? bd.end : null, status: 'نشط', createdAt: new Date().toISOString()
+        period, autoRenew: auto, appliedPeriods: [], periodStart: st, periodEnd: budgetEndFrom(period, st), status: 'نشط', createdAt: new Date().toISOString()
     });
-    saveData(); e.target.reset(); eqReset('budget'); budgetSel = new Set(); renderBudgetApply(); toast('تم حفظ السقف', 'ok');
+    saveData(); e.target.reset(); eqReset('budget'); renderBudgetApply(); toast('تم حفظ السقف', 'ok');
+}
+function budgetEdit(id) {
+    const b = appData.budgets.find(x => x.id === id); if (!b) return; const legacy = !b.periodStart;
+    dynModal('✏️ تعديل السقف: ' + b.category, `${fld('be-a', 'مبلغ السقف (' + b.currency + ')', `<input id="be-a" type="number" step="0.01" class="input-field" value="${b.amount}">`)}
+      ${legacy ? '' : `${fld('be-s', 'بداية الفترة الحالية', `<input id="be-s" type="date" class="input-field" value="${b.periodStart}">`)}${fld('be-e', 'نهايتها', `<input id="be-e" type="date" class="input-field" value="${b.periodEnd}">`)}
+      <label class="flex items-center gap-2 text-sm font-bold"><input id="be-r" type="checkbox" ${b.autoRenew ? 'checked' : ''}> تتجدد تلقائياً بعد الانتهاء</label>`}`, 'حفظ', () => {
+        const a = parseFloat($('be-a').value); if (!(a > 0)) { toast('أدخل مبلغاً صحيحاً', 'err'); return false; }
+        b.amount = a;
+        if (!legacy) { const st = $('be-s').value, en = $('be-e').value; if (!st || !en || en < st) { toast('تحقق من التواريخ', 'err'); return false; } b.periodStart = st; b.periodEnd = en; b.autoRenew = $('be-r').checked; }
+        saveData(); });
 }
 /** عند انتهاء فترة سقف autoRenew ينشئ سقفاً جديداً للفترة الحالية/القادمة */
 function renewBudgets(fresh) {
     const t = todayStr(); let changed = false;
-    appData.budgets.filter(b => b.status === 'نشط' && b.autoRenew && b.periodEnd < t).forEach(b => {
-        b.status = 'منتهي'; const bd = budgetBounds(b.period, t);
-        const nb = Object.assign({}, b, { id: uid(), periodStart: bd.start, periodEnd: bd.end, status: 'نشط', renewedFrom: b.id, createdAt: new Date().toISOString() });
+    appData.budgets.filter(b => b.status === 'نشط' && b.autoRenew && b.periodStart && b.periodEnd < t).forEach(b => {
+        b.status = 'منتهي'; let st = addDays(b.periodEnd, 1), en = budgetEndFrom(b.period, st), g = 0;
+        while (en < t && g++ < 800) { st = addDays(en, 1); en = budgetEndFrom(b.period, st); }
+        const nb = Object.assign({}, b, { id: uid(), periodStart: st, periodEnd: en, status: 'نشط', renewedFrom: b.id, createdAt: new Date().toISOString() });
         appData.budgets.push(nb); changed = true;
-        const n = { id: uid(), key: 'budget|' + nb.id, kind: 'budget', user: nb.owner || ownLegacy(), done: false, date: new Date().toISOString(), title: 'تجديد سقف تلقائي', body: `${b.category} — ${b.period}: ${fmtRaw(b.amount)} ${b.currency} (${bd.start} → ${bd.end})` };
+        const n = { id: uid(), key: 'budget|' + nb.id, kind: 'budget', user: nb.owner || ownLegacy(), done: false, date: new Date().toISOString(), title: 'تجديد سقف تلقائي', body: `${b.category} — ${b.period}: ${fmtRaw(b.amount)} ${b.currency} (${st} → ${en})` };
         appData.notifications.unshift(n); if (fresh) fresh.push(n);
     });
+    appData.budgets.filter(b => b.status === 'نشط' && !b.autoRenew && b.periodStart && b.periodEnd < t).forEach(b => { b.status = 'منتهي'; changed = true; });
     return changed;
 }
 /** نطاق السقوف: صاحب الحساب المتصفح فقط (المدير يستطيع اختيار آخر أو «الكل») */
 let BUD_OWNER = null;
 function budgetOwner() { return ownView('budgets'); }
 function budgetMonthTxs(b) {
-    const t = todayStr(), y = +t.slice(0, 4), m = +t.slice(5, 7), s0 = `${y}-${pad(m)}-01`, e0 = `${y}-${pad(m)}-${pad(dim(y, m))}`, bo = b.owner || ownLegacy(), out = [];
+    const w0 = evalBudget(b).win, s0 = w0.start, e0 = w0.end, bo = b.owner || ownLegacy(), out = [];
     allMovements().forEach(x => {
         if (!isExpense(x) || x.currency !== b.currency || x.date < s0 || x.date > e0 || (bo && x.owner !== bo)) return;
         const amt = b.category === ALL_CAT ? x.amount : catParts(x).filter(p => p.category === b.category).reduce((s, p) => s + p.amount, 0);
@@ -4735,14 +4787,14 @@ function budgetMonthTxs(b) {
     return out.sort((a, c) => c.date.localeCompare(a.date));
 }
 function budgetMonthHtml(b) {
-    const L = budgetMonthTxs(b); if (!L.length) return '<div class="text-[11px] text-slate-400">لا حركات في هذا السقف خلال الشهر الحالي</div>';
+    const L = budgetMonthTxs(b); if (!L.length) return '<div class="text-[11px] text-slate-400">لا حركات في هذا السقف خلال الفترة الحالية</div>';
     const tot = round2(L.reduce((s, x) => s + x.amt, 0));
-    return `<details class="text-xs"><summary class="cursor-pointer font-bold text-slate-600">🧾 حركات هذا الشهر (${L.length}) · ${fmt(tot)} ${esc(b.currency)}</summary><div class="mt-1 divide-y">${L.slice(0, 20).map(x => `<div class="flex justify-between gap-2 py-1"><span class="truncate">${esc(x.date.slice(5))} · ${esc(x.label)}</span><b>${fmt(x.amt)}</b></div>`).join('')}${L.length > 20 ? `<div class="py-1 text-slate-400">+ ${L.length - 20} حركة أخرى</div>` : ''}</div></details>`;
+    return `<details class="text-xs"><summary class="cursor-pointer font-bold text-slate-600">🧾 حركات الفترة الحالية (${L.length}) · ${fmt(tot)} ${esc(b.currency)}</summary><div class="mt-1 divide-y">${L.slice(0, 20).map(x => `<div class="flex justify-between gap-2 py-1"><span class="truncate">${esc(x.date.slice(5))} · ${esc(x.label)}</span><b>${fmt(x.amt)}</b></div>`).join('')}${L.length > 20 ? `<div class="py-1 text-slate-400">+ ${L.length - 20} حركة أخرى</div>` : ''}</div></details>`;
 }
 function setBudgetOwner(v) { OWNSEL.budgets = v; renderBudgets(); try { renderDashboard(); } catch (e) { } }
 function evalBudget(b) {
     const t = todayStr(), cur = budgetBounds(b.period, t); let win, active = true;
-    if (b.autoRenew) win = { start: b.periodStart, end: b.periodEnd };
+    if (b.periodStart) win = { start: b.periodStart, end: b.periodEnd };
     else { active = (b.appliedPeriods || []).includes(cur.index); win = { start: cur.start, end: cur.end }; }
     let spent = 0; const bo = b.owner || ownLegacy();
     if (active) allMovements().forEach(x => {
@@ -4752,6 +4804,7 @@ function evalBudget(b) {
     return { active, win, spent: round2(spent), pct: b.amount ? spent / b.amount * 100 : 0 };
 }
 function budgetApplyText(b) {
+    if (b.periodStart) return b.autoRenew ? '🔁 تتجدد تلقائياً' : 'فترة واحدة';
     if (b.autoRenew) return '🔁 تجديد تلقائي لجميع الفترات القادمة';
     return (b.period === 'أسبوعي' ? 'الأسابيع: ' : 'الأشهر: ') + (b.appliedPeriods || []).map(n => b.period === 'أسبوعي' ? n : MONTHS_AR[n - 1]).join('، ');
 }
@@ -4766,7 +4819,7 @@ function renderBudgets() {
         return `<div class="card p-5 space-y-3 ${ev.active ? '' : 'opacity-70'}">
             <div class="flex justify-between items-start gap-2">
                 <div><h3 class="font-black text-slate-800">${esc(b.category)}</h3><p class="text-xs text-slate-500">${esc(b.period)} · ${esc(budgetApplyText(b))}</p></div>
-                <button onclick="deleteBudget(${b.id})" class="list-item-delete text-xs font-bold">حذف</button>
+                <span class="flex gap-1"><button onclick="budgetEdit(${b.id})" class="px-2 py-1 bg-slate-100 rounded-lg text-xs font-bold">✏️ تعديل</button><button onclick="deleteBudget(${b.id})" class="list-item-delete text-xs font-bold">حذف</button></span>
             </div>
             ${ev.active ? `
             <div class="pbar ${cls}"><div style="width:${Math.min(100, ev.pct).toFixed(1)}%"></div></div>
@@ -4806,7 +4859,7 @@ function txRowHtml(t, actions) {
         <td><span class="badge ${TYPE_BADGE[t.type] || 'bg-slate-100'}">${esc(typeLabel(t.type))}</span></td>
         <td>${amountCell(t)}</td>
         <td>${linesHtml(t)}</td>
-        <td>${esc(fixArrow(t.party || t.description || '-'))}${tagsHtml(t)}${hasReserveUse(t) ? `<div class="eq-hint">🔒 خُصم ${fmt(t.reserveUsed || 0)} من مبلغ مخصص</div>` : ''}</td>
+        <td>${esc(fixArrow(t.party || t.description || '-'))}${tagsHtml(t)}${t.via ? `<div class="eq-hint">📲 نُفِّذت من تطبيق ${esc(t.via)}</div>` : ''}${hasReserveUse(t) ? `<div class="eq-hint">🔒 خُصم ${fmt(t.reserveUsed || 0)} من مبلغ مخصص</div>` : ''}</td>
         <td>${ownerCell(t)}</td>
         <td>${accountCell(t, true)}</td>
         <td>${esc(t.notes || '-')}${t.editedAt ? `<div class="eq-hint" title="${esc((t.edits || []).slice(-3).map(e => e.ch.join('، ')).join(' | '))}">✏️ عُدّلت</div>` : ''}${!actions && isMain() ? ` <button onclick="editTx('${t.id}')" class="text-sky-700 text-xs font-bold" title="تعديل">✏️</button>` : ''}</td>
@@ -4822,7 +4875,7 @@ function renderHistory() {
     const cat = $('filter-category').value, type = $('filter-type').value, now = todayStr(), from = $('filter-from').value, to = $('filter-to').value;
     const tagF = $('filter-tag') ? $('filter-tag').value : '', accF = $('filter-account') ? $('filter-account').value : '', bkF = $('filter-bucket') ? $('filter-bucket').value : '', ownF = $('filter-owner') ? $('filter-owner').value : '';
     const list = appData.transactions.filter(visible).filter(t => {
-        if (search && !((t.party || '') + ' ' + (t.description || '') + ' ' + (t.notes || '') + ' ' + (t.tags || []).join(' ')).toLowerCase().includes(search)) return false;
+        if (search && !((t.party || '') + ' ' + (t.description || '') + ' ' + (t.notes || '') + ' ' + (t.tags || []).join(' ') + ' ' + (t.via || '')).toLowerCase().includes(search)) return false;
         if (tagF && !(t.tags || []).includes(tagF)) return false;
         if (cat && cat !== ALL_CAT && !catParts(t).some(p => p.category === cat)) return false;
         if (type && t.type !== type) return false;
@@ -5054,7 +5107,7 @@ function renderSettingsLists() {
     set('settings-categories-list', appData.categories.map((c, i) => `<div class="py-2 flex justify-between items-center gap-2"><span>${esc(c)}</span>${mgButtons('category', i)}</div>`).join(''));
     set('settings-users-list', appData.users.map((u, ui) => `<div class="py-2 flex justify-between items-center gap-2"><span class="flex items-center gap-2">${isMain() ? mvBtns('user', ui, appData.users.length) : ''}${esc(u.name)}</span>
         <span class="flex items-center gap-2"><span class="badge ${u.role === 'رئيسي' ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'}">${esc(u.role)}</span>
-        ${isMain() ? `<button onclick="openUserModal('${u.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold">✏️ تعديل</button>`
+        ${isMain() ? `<button onclick="openUserModal('${u.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold">✏️ تعديل</button><button onclick="deleteUserAcc('${u.id}')" class="px-2 py-1 bg-rose-50 text-rose-700 rounded-lg text-xs font-bold">🗑️ حذف</button>`
             : (u.name === currentUser ? `<button onclick="openUserModal('${u.id}')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold">🔑 كلمة المرور</button>` : '')}</span></div>`).join(''));
     set('settings-currencies-list', appData.currencies.map((c, i) => `<div class="py-2 flex justify-between items-center gap-2"><span><b class="font-mono">${esc(c)}</b> <span class="text-slate-500 text-xs">${esc(CUR_NAMES[c] || '')}</span></span>${mgButtons('currency', i)}</div>`).join(''));
 }
@@ -5123,6 +5176,20 @@ window.addEventListener('appinstalled', () => $('install-btn').classList.add('hi
     if (isMobileUA() && !isStandalone() && !isNativeApp()) $('install-btn').classList.remove('hidden');
 })();
 
+
+/* حذف حساب (صاحب مال) */
+function deleteUserAcc(id) {
+    const u = appData.users.find(x => String(x.id) === String(id)); if (!u || !isMain()) return;
+    if (u.name === currentUser || (typeof REAL !== 'undefined' && REAL && REAL.name === u.name)) { toast('لا يمكنك حذف الحساب الذي تدخل به', 'err'); return; }
+    if (u.role === 'رئيسي' && appData.users.filter(x => x.role === 'رئيسي').length < 2) { toast('لا يمكن حذف آخر حساب رئيسي', 'err'); return; }
+    const mine = t => [t.owner, t.fromOwner, t.toOwner].includes(u.name), n = appData.transactions.filter(mine).length + archived.filter(mine).length;
+    if (!confirm(n ? `الحساب «${u.name}» له ${n} حركة. حذفه يحذف معه حركاته وفواتيره وسقوفه وأهدافه وديونه، وتتغير أرصدة الحركات المشتركة (التحويلات).\n\nننصح بنسخة احتياطية قبل ذلك. المتابعة؟` : `حذف الحساب «${u.name}»؟`)) return;
+    if (n && !confirm('تأكيد أخير: الحذف لا يمكن التراجع عنه. هل أنت متأكد؟')) return;
+    appData.transactions = appData.transactions.filter(t => !mine(t)); for (let i = archived.length - 1; i >= 0; i--) if (mine(archived[i])) archived.splice(i, 1);
+    appData.bills = (appData.bills || []).filter(b => b.owner !== u.name); appData.budgets = (appData.budgets || []).filter(b => b.owner !== u.name);
+    appData.goals = (appData.goals || []).filter(g => g.ownerName !== u.name); appData.debts = (appData.debts || []).filter(d => d.owner !== u.name); appData.reserves = (appData.reserves || []).filter(r => r.owner !== u.name);
+    appData.users = appData.users.filter(x => x !== u); saveData(); renderAll(); toast('حُذف الحساب', 'ok');
+}
 
 /* =====================================================================
    الجزء 4: طلبات التحويل، تعديل المستخدمين، الديون، تصدير xlsx/PDF حقيقي
@@ -9351,6 +9418,30 @@ function estIncomeDel(id, txId) {
     delTxById(txId); (e.assets || []).forEach(a => { if (String(a.txId) === String(txId)) { a.received = false; delete a.receivedDate; delete a.txId; } });
     saveData(); toast('حُذف الوارد', 'ok');
 }
+
+/* ---------- إجماليات المدفوعات والسقوف بحسب العملة ---------- */
+const MON_F = { day: 30, week: 52 / 12, month: 1, quarter: 1 / 3, half: 1 / 6, year: 1 / 12, 'يومي': 30, 'أسبوعي': 52 / 12, 'شهري': 1, 'سنوي': 1 / 12 };
+function totBox(id, anchor, title, rows, note) {
+    let el = $(id); if (!el) { el = document.createElement('div'); el.id = id; anchor.insertAdjacentElement('afterend', el); }
+    const cur = Object.keys(rows);
+    el.innerHTML = cur.length ? `<div class="card p-4 mt-4 bg-teal-50/60 border-teal-200"><h3 class="font-black text-sm text-teal-900 mb-2">${title}</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${cur.map(c => `<div class="bg-white rounded-xl p-3 border"><div class="text-xs text-slate-500 mb-1">${esc(c)}</div>${rows[c].map(([l, v]) => `<div class="flex justify-between text-sm"><span>${l}</span><b>${fmt(v)} ${esc(c)}</b></div>`).join('')}</div>`).join('')}</div><p class="eq-hint mt-2">${note}</p></div>` : '';
+}
+const _renderBills24 = renderBills;
+renderBills = function () {
+    _renderBills24.apply(this, arguments); const tb = $('bills-table-body'); if (!tb) return;
+    const vo = ownView('bills'), L = appData.bills.filter(b => b.active !== false && (!vo || b.owner === vo)), t = todayStr(), eom = `${t.slice(0, 7)}-${pad(dim(+t.slice(0, 4), +t.slice(5, 7)))}`, R = {};
+    L.forEach(b => { const r = R[b.currency] = R[b.currency] || { m: 0, d: 0 }; r.m += (+b.amount || 0) * (MON_F[b.period] || 1); if (b.nextDueDate && b.nextDueDate <= eom) r.d += +billAmountFor(b, b.nextDueDate) || 0; });
+    const rows = {}; Object.keys(R).forEach(c => rows[c] = [['المتوسط الشهري لكل الالتزامات', round2(R[c].m)], ['المستحق حتى نهاية هذا الشهر', round2(R[c].d)]]);
+    totBox('bills-total-box', (tb.closest('.card') || tb), '🧮 إجمالي المدفوعات الدورية' + (vo ? ' — ' + esc(vo) : ' — كل الحسابات'), rows, 'المتوسط الشهري = كل دفعة محوَّلة إلى شهر (الأسبوعية ×4.33، السنوية ÷12). المستحق = ما حان موعده ولم يُدفع/يُعفَ حتى آخر الشهر. كل عملة على حدة.');
+};
+const _renderBudgets24 = renderBudgets;
+renderBudgets = function () {
+    _renderBudgets24.apply(this, arguments); const c = $('budgets-list-container'); if (!c) return;
+    const vo = ownView('budgets'), L = appData.budgets.filter(b => b.status === 'نشط' && (!vo || b.owner === vo)), R = {};
+    L.forEach(b => { const r = R[b.currency] = R[b.currency] || { m: 0, s: 0 }; r.m += (+b.amount || 0) * (MON_F[b.period] || 1); r.s += evalBudget(b).spent; });
+    const rows = {}; Object.keys(R).forEach(k => rows[k] = [['المتوسط الشهري لكل السقوف', round2(R[k].m)], ['المصروف داخل السقوف حالياً', round2(R[k].s)]]);
+    totBox('budgets-total-box', c, '🧮 إجمالي السقوف' + (vo ? ' — ' + esc(vo) : ' — كل الحسابات'), rows, 'المتوسط الشهري = كل سقف محوَّل إلى شهر (الأسبوعي ×4.33، اليومي ×30، السنوي ÷12). كل عملة على حدة، بلا تحويل بينها.');
+};
 
 /* ---------- التشغيل ---------- */
 migrate();
