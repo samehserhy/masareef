@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>برنامج المصاريف اليومي — v7.16</title>
+    <title>برنامج المصاريف اليومي — v7.19</title>
     <meta name="theme-color" content="#0d9488">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1384,6 +1384,9 @@
     --tw-tracking: var(--tracking-widest);
     letter-spacing: var(--tracking-widest);
   }
+  .break-words {
+    overflow-wrap: break-word;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -2122,6 +2125,10 @@ th { background: #f3f7f6; }
   #sec-history .card, #sec-bills .card { padding: 14px; }
 }
 
+/* v7.17: منع اتساع الصفحة أفقياً على الجوال + التفاف خلايا البطاقات */
+html { overflow-x: hidden; }
+@media (max-width:767px) { table.rt td > * { min-width: 0; overflow-wrap: anywhere; } table.rt td { flex-wrap: wrap; } }
+
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -2475,7 +2482,7 @@ th { background: #f3f7f6; }
                         <select id="tx-owner" class="input-field"></select>
                     </div>
                     <div id="tx-via-wrap">
-                        <label class="block mb-1.5 font-bold text-sm text-slate-700">📲 نُفِّذت من تطبيق</label>
+                        <label id="lbl-via" class="block mb-1.5 font-bold text-sm text-slate-700">📲 نُفِّذت من تطبيق</label>
                         <select id="tx-via" class="input-field"></select>
                         <p class="eq-hint mt-1">إن أرسلها شخص آخر من تطبيقه البنكي بمالك، اخترْه ليسهل مطابقتها مع سجلاته.</p>
                     </div>
@@ -2508,7 +2515,7 @@ th { background: #f3f7f6; }
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div id="field-bucket">
-                        <label class="block mb-1.5 font-bold text-sm text-slate-700">نوع تخصيص المال</label>
+                        <label id="lbl-bucket" class="block mb-1.5 font-bold text-sm text-slate-700">يُودَع في</label>
                         <select id="tx-bucket" class="input-field">
                             <option value="مصاريف">🛒 حساب المصاريف والإنفاق اليومي</option>
                             <option value="ادخار">🏦 حساب الادخار والتوفير</option>
@@ -2734,6 +2741,10 @@ th { background: #f3f7f6; }
                         <div>
                             <label class="block mb-1 text-xs font-bold text-slate-600">نوع تخصيص المال</label>
                             <select id="filter-bucket" onchange="renderHistory()" class="input-field"><option value="">الكل</option></select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-xs font-bold text-slate-600">📲 نُفِّذت من تطبيق</label>
+                            <select id="filter-via" onchange="renderHistory()" class="input-field"><option value="">الكل</option></select>
                         </div>
                         <div id="filter-owner-wrap">
                             <label class="block mb-1 text-xs font-bold text-slate-600">صاحب المال</label>
@@ -3343,6 +3354,14 @@ th { background: #f3f7f6; }
                     <label class="block mb-1 text-xs font-bold text-slate-700">المبلغ المدفوع هذه المرة (عدّله إن سامحك صاحبها أو خفّض/زاد)</label>
                     <input id="pay-amount" type="number" step="0.01" class="input-field text-sm" oninput="updatePayBalance()">
                 </div>
+                <div>
+                    <label class="block mb-1 text-xs font-bold text-slate-700">المدفوع له (الجهة التي أُرسل إليها)</label>
+                    <input id="pay-payee" type="text" list="parties-list" class="input-field text-sm" placeholder="مثال: صاحب الشقة">
+                </div>
+                <div>
+                    <label class="block mb-1 text-xs font-bold text-slate-700">📲 نُفِّذت من تطبيق</label>
+                    <select id="pay-via" class="input-field text-sm"></select>
+                </div>
                 <div id="pay-balance-hint" class="text-xs font-bold text-slate-600"></div>
                 <button onclick="confirmBillPayment()" class="btn-primary w-full py-2.5 text-sm">✅ تأكيد الدفع والخصم</button>
             </div>
@@ -3464,7 +3483,7 @@ th { background: #f3f7f6; }
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.16 (النسخة · الإصدار)</div>
+    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.19 (النسخة · الإصدار)</div>
     <div id="toast-box"></div>
 
 
@@ -3580,7 +3599,7 @@ th { background: #f3f7f6; }
 /* =====================================================================
    برنامج المصاريف اليومي — الجزء 1: الأساسيات، البيانات، لوحة المتابعة، تسجيل الحركات
    ===================================================================== */
-const APP_VERSION = '7.16';
+const APP_VERSION = '7.19';
 const isNativeApp = () => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) { return false; } };
 const nativePlugin = n => { try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]) || null; } catch (e) { return null; } };
 const LS_KEY = 'my_wallet_data_v2';
@@ -4027,7 +4046,9 @@ function toggleTxFields() {
     $('single-account-owner-block').style.display = isTransfer ? 'none' : 'grid';
     $('transfer-account-owner-block').style.display = isTransfer ? 'grid' : 'none';
     $('field-category').style.display = (isTransfer || type !== 'صرف') ? 'none' : 'block';
-    $('field-bucket').style.display = (isTransfer || isEx) ? 'none' : 'block';
+    $('field-bucket').style.display = (isTransfer || isEx || type === 'صرف' || type === 'أمانة') ? 'none' : 'block';
+    if (type === 'صرف' || type === 'أمانة') { const bs = $('tx-bucket'); if (bs && [...bs.options].some(o => o.value === BUCKET_DEFAULT)) bs.value = BUCKET_DEFAULT; }
+    if ($('lbl-via')) $('lbl-via').textContent = type === 'إيداع' ? '📲 استُلم في تطبيق' : '📲 نُفِّذت من تطبيق';
     $('field-receipt').style.display = isTrust ? 'block' : 'none';
     $('field-party').style.display = (isTransfer || isEx) ? 'none' : 'block';
     if ($('exchange-block')) $('exchange-block').style.display = isEx ? 'grid' : 'none';
@@ -4496,7 +4517,7 @@ function showPayForm() {
     $('pay-owner').value = (b.owner && appData.users.some(u => u.name === b.owner) && isMain()) ? b.owner : currentUser;
     $('pay-account').innerHTML = appData.accounts.map(a => `<option value="${esc(a.name)}">${esc(a.name)} (${esc(a.type)})</option>`).join('');
     if (b.defaultAccount && getAcc(b.defaultAccount)) $('pay-account').value = b.defaultAccount;
-    $('pay-amount').value = billAmountFor(b, b.nextDueDate);
+    $('pay-amount').value = billAmountFor(b, b.nextDueDate); $('pay-payee').value = b.payee || b.name; $('pay-via').innerHTML = '<option value="">تطبيقي (نفس صاحب المال)</option>' + appData.users.map(u => `<option value="${esc(u.name)}">${esc(u.name)}</option>`).join(''); $('pay-via').value = b.payVia || '';
     $('bill-pay-form').classList.remove('hidden'); updatePayBalance();
 }
 function billAmountFor(b, due) { const o = (b.overrides || {})[due]; return o != null ? o : b.amount; }
@@ -4536,14 +4557,16 @@ function confirmBillPayment() {
     if (bal < amt && !confirm(`الرصيد (${fmtRaw(bal)} ${b.currency}) أقل من المبلغ. هل تريد المتابعة؟ سيصبح الرصيد سالباً.`)) return;
     const rid = askReserveChoiceFor({ owner, currency: b.currency, category: b.category, party: b.name, amount: amt }); if (rid === false) return;
     if (!guardReserved({ owner, currency: b.currency, amount: amt, reserveId: rid })) return;
+    const payee = ($('pay-payee').value || '').trim(), via = $('pay-via').value || '';
     const now = new Date(), paidFor = b.nextDueDate, label = billPeriodLabel(b, paidFor), txId = uid();
     // account.balance -= amount  (الرصيد يُحسب من الحركات، فالحركة الجديدة هي الخصم)
     const billTx = {
         id: txId, type: 'recurring_payment', accountId: (getAcc(accName) || {}).id, account: accName, owner,
         amount: amt, currency: b.currency, equivalentCurrencies: b.equivalentCurrencies || {},
         date: ymd(now), ts: now.toISOString(), bucket: 'مصاريف', category: b.category, billId: b.id, forDueDate: paidFor, periodLabel: label,
-        description: `دفع دوري: ${b.name} — عن ${label}`, party: `دفع دوري: ${b.name} (${label})`, notes: '', submittedBy: currentUser
+        description: `دفع دوري: ${b.name} — عن ${label}`, party: (payee && payee !== b.name) ? `دفع دوري: ${b.name} ← ${payee} (${label})` : `دفع دوري: ${b.name} (${label})`, notes: '', submittedBy: currentUser
     };
+    if (via) billTx.via = via; b.payee = payee; b.payVia = via;
     if (rid) billTx.reserveId = rid;
     appData.transactions.push(billTx); applyReserveUse(billTx);
     (b.payments = b.payments || []).push({ txId, dueDate: paidFor, label, paidOn: ymd(now), amount: amt, currency: b.currency });
@@ -4826,6 +4849,7 @@ function renderBudgets() {
             <div class="flex justify-between text-sm font-bold"><span>${ev.pct.toFixed(0)}%</span><span>${fmt(ev.spent)} / ${fmt(b.amount)} ${esc(b.currency)}</span></div>
             ${eqLine(b)}
             <div class="text-xs text-slate-500">المتبقي: <b>${fmt(Math.max(0, b.amount - ev.spent))}</b> · الفترة ${esc(ev.win.start)} ← ${esc(ev.win.end)}</div>
+            ${budgetPrevHtml(b)}
             ${budgetMonthHtml(b)}`
             : '<div class="text-xs text-slate-500 py-2">غير مفعّل في الفترة الحالية (خارج الأشهر/الأسابيع المختارة)</div>'}
         </div>`;
@@ -4835,8 +4859,24 @@ function renderBudgets() {
         if (ev.active && ev.pct >= 80) warns += `<div class="card p-4 ${ev.pct >= 100 ? 'bg-rose-50 border-rose-300 text-rose-900' : 'bg-amber-50 border-amber-300 text-amber-900'} text-sm font-bold">${ev.pct >= 100 ? '🚨 تجاوزت' : '⚠️ اقتربت من'} سقف «${esc(b.category)}» (${esc(b.period)}): ${fmt(ev.spent)} من ${fmt(b.amount)} ${esc(b.currency)}</div>`;
         return card(b, ev);
     }).join('') : '<div class="card p-8 text-center text-slate-400 md:col-span-2">لا توجد سقوف بعد</div>';
-    if (ended.length) c.innerHTML += `<details class="md:col-span-2 card p-4"><summary class="font-bold text-sm text-slate-600 cursor-pointer">سقوف منتهية (${ended.length})</summary><div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">${ended.map(b => `<div class="p-3 bg-slate-50 rounded-xl border text-xs"><b>${esc(b.category)}</b> · ${esc(b.period)} · ${fmt(b.amount)} ${esc(b.currency)}<br>${esc(b.periodStart || '')} ← ${esc(b.periodEnd || '')}</div>`).join('')}</div></details>`;
+    if (ended.length) c.innerHTML += `<details class="md:col-span-2 card p-4"><summary class="font-bold text-sm text-slate-600 cursor-pointer">📚 سقوف منتهية (${ended.length})</summary><div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">${[...ended].sort((x, y) => (y.periodEnd || '').localeCompare(x.periodEnd || '')).map(budgetEndedCard).join('')}</div></details>`;
     if (w) w.innerHTML = warns;
+}
+function budgetEndedCard(b) {
+    if (!b.periodStart) return `<div class="p-3 bg-slate-50 rounded-xl border text-xs"><b>${esc(b.category)}</b> · ${esc(b.period)} · ${fmt(b.amount)} ${esc(b.currency)}</div>`;
+    const ev = evalBudget(b), cls = ev.pct >= 100 ? 'bad' : ev.pct >= 80 ? 'warn' : 'ok', left = round2(b.amount - ev.spent);
+    return `<div class="p-3 bg-slate-50 rounded-xl border space-y-1.5">
+        <div class="flex justify-between items-start gap-2"><div><b class="text-sm">${esc(b.category)}</b><div class="text-xs text-slate-500">${esc(b.period)} · ${esc(b.periodStart)} ← ${esc(b.periodEnd)}${ownerTag(b)}</div></div>
+        <span class="text-xs font-black ${ev.pct >= 100 ? 'text-rose-600' : 'text-emerald-700'}">${ev.pct >= 100 ? '🚨 تجاوزت' : '✅ ضمن السقف'}</span></div>
+        <div class="pbar ${cls}"><div style="width:${Math.min(100, ev.pct).toFixed(1)}%"></div></div>
+        <div class="flex justify-between text-xs font-bold"><span>${ev.pct.toFixed(0)}%</span><span>صُرف ${fmt(ev.spent)} من ${fmt(b.amount)} ${esc(b.currency)}</span></div>
+        <div class="text-xs ${left < 0 ? 'text-rose-600' : 'text-emerald-700'} font-bold">${left < 0 ? 'تجاوز بمقدار ' + fmt(-left) : 'وفّرتَ ' + fmt(left)} ${esc(b.currency)}</div>
+        ${budgetMonthHtml(b)}</div>`;
+}
+const ownerTag = b => (isMain() && !ownView('budgets') && b.owner) ? ' · 👤 ' + esc(b.owner) : '';
+function budgetPrevHtml(b) {
+    const p = b.renewedFrom && appData.budgets.find(x => x.id === b.renewedFrom); if (!p || !p.periodStart) return '';
+    const ev = evalBudget(p); return `<div class="text-xs rounded-lg px-2 py-1 ${ev.pct >= 100 ? 'bg-rose-50 text-rose-800' : 'bg-slate-50 text-slate-600'}">⏮️ الفترة السابقة (${esc(p.periodStart)} ← ${esc(p.periodEnd)}): صُرف <b>${fmt(ev.spent)}</b> من ${fmt(p.amount)} ${esc(p.currency)} (${ev.pct.toFixed(0)}%)</div>`;
 }
 function deleteBudget(id) { if (confirm('حذف هذا السقف؟')) { appData.budgets = appData.budgets.filter(b => b.id !== id); saveData(); } }
 
@@ -4859,10 +4899,10 @@ function txRowHtml(t, actions) {
         <td><span class="badge ${TYPE_BADGE[t.type] || 'bg-slate-100'}">${esc(typeLabel(t.type))}</span></td>
         <td>${amountCell(t)}</td>
         <td>${linesHtml(t)}</td>
-        <td>${esc(fixArrow(t.party || t.description || '-'))}${tagsHtml(t)}${t.via ? `<div class="eq-hint">📲 نُفِّذت من تطبيق ${esc(t.via)}</div>` : ''}${hasReserveUse(t) ? `<div class="eq-hint">🔒 خُصم ${fmt(t.reserveUsed || 0)} من مبلغ مخصص</div>` : ''}</td>
+        <td>${esc(fixArrow(t.party || t.description || '-'))}${tagsHtml(t)}${t.via ? `<div class="eq-hint">📲 ${t.type === 'إيداع' ? 'استُلم في' : 'نُفِّذت من'} تطبيق ${esc(t.via)}</div>` : ''}${hasReserveUse(t) ? `<div class="eq-hint">🔒 خُصم ${fmt(t.reserveUsed || 0)} من مبلغ مخصص</div>` : ''}</td>
         <td>${ownerCell(t)}</td>
         <td>${accountCell(t, true)}</td>
-        <td>${esc(t.notes || '-')}${t.editedAt ? `<div class="eq-hint" title="${esc((t.edits || []).slice(-3).map(e => e.ch.join('، ')).join(' | '))}">✏️ عُدّلت</div>` : ''}${!actions && isMain() ? ` <button onclick="editTx('${t.id}')" class="text-sky-700 text-xs font-bold" title="تعديل">✏️</button>` : ''}</td>
+        <td><div class="min-w-0 break-words" style="overflow-wrap:anywhere">${esc(t.notes || '-')}${t.editedAt ? `<div class="eq-hint" title="${esc((t.edits || []).slice(-3).map(e => e.ch.join('، ')).join(' | '))}">✏️ عُدّلت</div>` : ''}${!actions && isMain() ? ` <button onclick="editTx('${t.id}')" class="text-sky-700 text-xs font-bold" title="تعديل">✏️</button>` : ''}</div></td>
         ${actions ? `<td class="text-center whitespace-nowrap">${isMain() ? `<button onclick="editTx('${t.id}')" class="text-sky-700 text-xs font-bold" title="تعديل الحركة (التاريخ/المبلغ/صاحب المال/الحساب…)">✏️</button> <button onclick="editTags(${t.id})" class="text-teal-700 text-xs font-bold" title="تعديل الوسوم">🏷️</button> ${t.type === 'صرف' ? `<button onclick="splitEditTx(${t.id})" class="text-indigo-700 text-xs font-bold" title="تجزئة على أصناف">🧩</button>` : ''} ${['صرف','أمانة','تحويل','صرافة','إيداع'].includes(t.type) ? `<button onclick="editBuckets(${t.id})" class="text-amber-700 text-xs font-bold" title="الادخار: من أين خُصم / أين أُودع">🏦</button>` : ''} <button onclick="deleteTx(${t.id})" class="text-red-600 text-xs font-bold">حذف</button>` : '-'}</td>` : ''}
     </tr>`;
 }
@@ -4881,6 +4921,7 @@ function renderHistory() {
         if (type && t.type !== type) return false;
         if (accF && accNameOf(t) !== accF && t.fromAccount !== accF && t.toAccount !== accF) return false;
         if (bkF && !bucketMatch(t, bkF)) return false;
+        const vF = $('filter-via') ? $('filter-via').value : ''; if (vF && (vF === '__me' ? !!t.via : t.via !== vF)) return false;
         if (ownF && t.owner !== ownF && t.fromOwner !== ownF && t.toOwner !== ownF) return false;
         if (histMonths.length) { if (!histMonths.includes((t.date || '').slice(0, 7))) return false; }
         else { if (from && (t.date || '') < from) return false; if (to && (t.date || '') > to) return false; }
@@ -4933,7 +4974,7 @@ function renderMonthChips() {
     $('filter-month-chips').innerHTML = histMonths.map(m => `<span class="chip on" onclick="removeFilterMonth('${m}')" title="إزالة">${esc(periodLabel(m))} ✕</span>`).join('');
     $('filter-range-wrap').style.opacity = histMonths.length ? '.45' : '1';
 }
-function resetFilters() { histMonths = []; $('filter-from').value = ''; $('filter-to').value = ''; renderMonthChips(); $('filter-search').value = ''; $('filter-archive-period').value = 'all'; $('filter-category').value = ALL_CAT; $('filter-type').value = ''; if ($('filter-tag')) $('filter-tag').value = ''; if ($('filter-account')) $('filter-account').value = ''; if ($('filter-bucket')) $('filter-bucket').value = ''; if ($('filter-owner')) $('filter-owner').value = ''; renderHistory(); }
+function resetFilters() { histMonths = []; $('filter-from').value = ''; $('filter-to').value = ''; renderMonthChips(); $('filter-search').value = ''; $('filter-archive-period').value = 'all'; $('filter-category').value = ALL_CAT; $('filter-type').value = ''; if ($('filter-tag')) $('filter-tag').value = ''; if ($('filter-account')) $('filter-account').value = ''; if ($('filter-bucket')) $('filter-bucket').value = ''; if ($('filter-via')) $('filter-via').value = ''; if ($('filter-owner')) $('filter-owner').value = ''; renderHistory(); }
 function deleteTx(id) {
     if (!isMain()) return;
     const tx = appData.transactions.find(t => t.id === id); if (!tx) return;
@@ -6938,17 +6979,19 @@ function applyBucketFields(tx) {
 /* تعديل بند الادخار لحركة قديمة */
 function editBuckets(id) {
     const t = appData.transactions.find(x => x.id === id) || archived.find(x => x.id === id); if (!t || !isMain()) return;
-    const dest = t.type === 'تحويل' || t.type === 'صرافة';
+    const dest = t.type === 'تحويل' || t.type === 'صرافة', isDep = t.type === 'إيداع';
     let ov = document.getElementById('bk-modal'); if (ov) ov.remove();
     ov = document.createElement('div'); ov.id = 'bk-modal'; ov.className = 'fixed inset-0 bg-black/50 z-[90] flex items-center justify-center p-4';
     ov.innerHTML = `<div class="card p-5 w-full max-w-sm space-y-3"><h3 class="font-black text-sm">🎯 نوع تخصيص المال — ${esc(typeLabel(t.type))} ${fmt(t.amount)} ${esc(t.currency)}</h3>
-      <label class="block text-xs font-bold">خُصم من:</label><select id="bk-from" class="input-field text-sm"><option value="">الرصيد العادي</option>${nonDefBuckets().map(b => `<option value="${esc(b)}" ${t.fromBucket === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>
+      ${isDep ? `<label class="block text-xs font-bold">يُودَع في:</label><select id="bk-dep" class="input-field text-sm">${allBuckets().map(b => `<option value="${esc(b)}" ${(t.bucket || BUCKET_DEFAULT) === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>`
+        : `<label class="block text-xs font-bold">يُخصم من:</label><select id="bk-from" class="input-field text-sm"><option value="">الرصيد العادي</option>${nonDefBuckets().map(b => `<option value="${esc(b)}" ${t.fromBucket === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>`}
       ${dest ? `<label class="block text-xs font-bold">أُودع في:</label><select id="bk-to" class="input-field text-sm"><option value="">الرصيد العادي</option>${nonDefBuckets().map(b => `<option value="${esc(b)}" ${t.toBucket === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>` : ''}
       <div class="flex gap-2"><button class="btn-primary flex-1 py-2 text-sm" onclick="saveBuckets(${t.id})">حفظ</button><button class="btn-secondary flex-1 py-2 text-sm" onclick="document.getElementById('bk-modal').remove()">إلغاء</button></div></div>`;
     document.body.appendChild(ov);
 }
 function saveBuckets(id) {
     const t = appData.transactions.find(x => x.id === id) || archived.find(x => x.id === id); if (!t) return;
+    if ($('bk-dep')) { t.bucket = $('bk-dep').value; $('bk-modal').remove(); saveData(); toast('تم تحديث نوع تخصيص المال', 'ok'); return; }
     const f = $('bk-from').value, to = $('bk-to') ? $('bk-to').value : '';
     if (f) t.fromBucket = f; else delete t.fromBucket;
     if (to) t.toBucket = to; else delete t.toBucket;
@@ -8072,6 +8115,7 @@ function bucketFillSelects() {
     keep('tx-to-bucket', o('', 'الرصيد العادي') + nonDefBuckets().map(b => o(b, bucketIcon(b) + ' في «' + b + '»')).join(''));
     keep('filter-bucket', o('', 'الكل') + allBuckets().map(b => o(b, bucketIcon(b) + ' ' + b)).join(''));
     keep('global-bucket-filter', o(ALL_BKT, ALL_BKT) + allBuckets().map(b => o(b, bucketIcon(b) + ' ' + b)).join(''), ALL_BKT);
+    keep('filter-via', o('', 'الكل') + o('__me', 'تطبيق صاحب المال نفسه') + appData.users.map(u => o(u.name, 'تطبيق ' + u.name)).join(''));
     keep('filter-owner', o('', 'كل أصحاب المال') + appData.users.map(u => o(u.name)).join(''));
     const w = $('filter-owner-wrap'); if (w) w.style.display = isMain() ? '' : 'none';
 }
@@ -8300,8 +8344,10 @@ function editTx(id) {
         h += fld('صاحب المال', sel('etx-owner', users, t.owner)) + fld(isX ? 'من حساب' : 'الحساب', sel('etx-account', accs, accNameOf(t)));
         if (isX) h += fld('المبلغ المستلم', `<input type="number" step="0.01" id="etx-toAmount" class="input-field text-sm" value="${t.toAmount || ''}">`) + fld('العملة المستلمة', sel('etx-toCurrency', curs, t.toCurrency)) + fld('إلى حساب', sel('etx-toAccount', accs, t.toAccount || accNameOf(t)));
         if (t.type === 'صرف' && !hasLines) h += fld('التصنيف', sel('etx-category', appData.categories, t.category));
-        if (t.type === 'إيداع') h += fld('نوع تخصيص المال', sel('etx-bucket', allBuckets(), t.bucket || BUCKET_DEFAULT));
-        if (!isX && t.type !== 'إيداع' || t.type === 'إيداع') h += fld(t.type === 'إيداع' ? 'خُصم من نوع (استرجاع)' : 'خُصم من نوع تخصيص', sel('etx-fromBucket', nonDefBuckets(), t.fromBucket || '', 'الرصيد العادي'));
+        if (t.type === 'إيداع') h += fld('يُودَع في', sel('etx-bucket', allBuckets(), t.bucket || BUCKET_DEFAULT));
+        if (t.type === 'إيداع') { if (t.fromBucket) h += fld('خُصم من نوع (بيانات قديمة — اتركه أو غيّره)', sel('etx-fromBucket', nonDefBuckets(), t.fromBucket || '', 'الرصيد العادي')); }
+        else if (!isX) h += fld('يُخصم من', sel('etx-fromBucket', nonDefBuckets(), t.fromBucket || '', 'الرصيد العادي'));
+        h += fld(t.type === 'إيداع' ? '📲 استُلم في تطبيق' : '📲 نُفِّذت من تطبيق', sel('etx-via', users, t.via || '', 'تطبيقي (نفس صاحب المال)'));
     }
     if (!isT && !isX && !linked) h += fld('الجهة / البيان', `<input type="text" id="etx-party" list="parties-list" class="input-field text-sm" value="${esc(t.party || '')}">`, true);
     h += fld('ملاحظات', `<input type="text" id="etx-notes" class="input-field text-sm" value="${esc(t.notes || '')}">`, true);
@@ -8331,6 +8377,7 @@ function saveEditTx(id) {
             if (v('category') !== undefined) nu.category = v('category');
             if (v('bucket') !== undefined) nu.bucket = v('bucket');
             if (v('fromBucket') !== undefined) nu.fromBucket = v('fromBucket');
+            if (v('via') !== undefined) nu.via = v('via');
             if (v('party') !== undefined) nu.party = (v('party') || '').trim() || t.party;
         }
     }
@@ -8338,7 +8385,7 @@ function saveEditTx(id) {
     const hadRes = hasReserveUse(t), oldOwner = t.owner, oldCur = t.currency;
     const lineRes = hasLines ? t.lines.map(l => l.reserveId || null) : null, oldRid = t.reserveId;
     if (hadRes) revertAllReserve(t);
-    const label = { date: 'التاريخ', amount: 'المبلغ', currency: 'العملة', fromOwner: 'من صاحب المال', fromAccount: 'من حساب', toOwner: 'إلى صاحب المال', toAccount: 'إلى حساب', owner: 'صاحب المال', account: 'الحساب', toAmount: 'المبلغ المستلم', toCurrency: 'العملة المستلمة', category: 'التصنيف', bucket: 'نوع التخصيص', fromBucket: 'مخصوم من نوع', party: 'الجهة', notes: 'الملاحظات' };
+    const label = { via: 'نُفِّذت من تطبيق', date: 'التاريخ', amount: 'المبلغ', currency: 'العملة', fromOwner: 'من صاحب المال', fromAccount: 'من حساب', toOwner: 'إلى صاحب المال', toAccount: 'إلى حساب', owner: 'صاحب المال', account: 'الحساب', toAmount: 'المبلغ المستلم', toCurrency: 'العملة المستلمة', category: 'التصنيف', bucket: 'نوع التخصيص', fromBucket: 'مخصوم من نوع', party: 'الجهة', notes: 'الملاحظات' };
     Object.keys(nu).forEach(k => {
         if (k === 'account') { if (!same(accNameOf(t), nu.account)) { ch.push(`${label[k]}: ${accNameOf(t)} ← ${nu.account}`); t.account = nu.account; t.accountId = (getAcc(nu.account) || {}).id; } return; }
         if (k === 'fromBucket') { if (!same(t.fromBucket, nu.fromBucket)) { ch.push(`${label[k]}: ${t.fromBucket || 'العادي'} ← ${nu.fromBucket || 'العادي'}`); if (nu.fromBucket) t.fromBucket = nu.fromBucket; else delete t.fromBucket; } return; }
