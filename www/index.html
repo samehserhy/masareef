@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>برنامج المصاريف اليومي — v7.19</title>
+    <title>برنامج المصاريف اليومي — v7.20</title>
     <meta name="theme-color" content="#0d9488">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3483,7 +3483,7 @@ html { overflow-x: hidden; }
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.19 (النسخة · الإصدار)</div>
+    <div class="text-center text-[11px] text-slate-400 font-bold py-4" dir="ltr">برنامج المصاريف اليومي — v7.20 (النسخة · الإصدار)</div>
     <div id="toast-box"></div>
 
 
@@ -3599,7 +3599,7 @@ html { overflow-x: hidden; }
 /* =====================================================================
    برنامج المصاريف اليومي — الجزء 1: الأساسيات، البيانات، لوحة المتابعة، تسجيل الحركات
    ===================================================================== */
-const APP_VERSION = '7.19';
+const APP_VERSION = '7.20';
 const isNativeApp = () => { try { return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); } catch (e) { return false; } };
 const nativePlugin = n => { try { return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[n]) || null; } catch (e) { return null; } };
 const LS_KEY = 'my_wallet_data_v2';
@@ -8009,7 +8009,9 @@ function reconSummary(m) {
         const k = rcKey(o, a, c), rec = m.bal[k], act = m.st.actual[k]; per[c].rec += rec; cells++;
         if (act == null) { if (rec !== 0) missing++; } else { per[c].recEntered += rec; per[c].act += +act; }
     })));
-    return { per, missing, cells };
+    const allNames = isMain() ? appData.users.map(u => u.name) : m.owners;
+    m.curs.forEach(c => { let t = 0; allNames.forEach(o => m.accs.forEach(a => { t += getBalance(o, a, c); })); per[c].all = round2(t); });
+    return { per, missing, cells, allCount: allNames.length };
 }
 function renderReconCard() {
     const box = $('recon-card-body'); if (!box) return;
@@ -8053,8 +8055,17 @@ function reconRefresh() {
         return `<tr class="border-t border-slate-100"><td class="px-2 py-2 font-bold">${esc(c)}</td><td class="px-2 text-center">${fmt(round2(p.rec))}</td><td class="px-2 text-center">${fmt(round2(p.act))}</td><td class="px-2 text-center font-bold ${cls}">${d === 0 ? '✅ مطابق' : (d > 0 ? '▲ زيادة ' + fmt(d) : '▼ عجز ' + fmt(-d))}</td></tr>`;
     }).join('');
     ilsDiff = round2(ilsDiff);
-    box.innerHTML = `<div class="card p-4 bg-slate-50 border-2 border-teal-200 mt-2"><div class="font-bold text-teal-800 mb-2">📊 ملخص المطابقة (الجميع)</div>
-      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-500"><th class="px-2 text-right">العملة</th><th class="px-2">إجمالي المسجّل بالبرنامج</th><th class="px-2">إجمالي الفعلي المُدخل</th><th class="px-2">الفرق (على المُدخل فقط)</th></tr></thead><tbody>${rows}</tbody></table></div>
+    let allDiffIls = 0, allOk = true;
+    const allRows = m.curs.map(c => { const p = S.per[c], d = round2(p.act - p.all), e = convertAmt(d, c, 'ILS'); if (e == null) allOk = false; else allDiffIls += e; const cls = d === 0 ? 'text-emerald-700' : d > 0 ? 'text-sky-700' : 'text-rose-700';
+        return `<tr class="border-t border-slate-100"><td class="px-2 py-2 font-bold">${esc(c)}</td><td class="px-2 text-center">${fmt(p.all)}</td><td class="px-2 text-center">${fmt(round2(p.act))}</td><td class="px-2 text-center font-bold ${cls}">${d === 0 ? '✅ مطابق' : (d > 0 ? '▲ زيادة ' + fmt(d) : '▼ عجز ' + fmt(-d))}</td></tr>`; }).join('');
+    allDiffIls = round2(allDiffIls);
+    const totalBlock = `<div class="card p-4 bg-white border-2 border-emerald-300 mt-2"><div class="font-bold text-emerald-800 mb-1">🧮 المطابقة الإجمالية ${isMain() ? '(كل أصحاب المال ' + S.allCount + ')' : ''}</div>
+      <p class="eq-hint mb-2">أموال الجميع محفوظة فعلياً في تطبيقاتك، لذلك نقارن <b>مجموع كل المسجّل</b> بمجموع الأرصدة الفعلية التي أدخلتها. هذا هو الفرق الحقيقي.</p>
+      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-500"><th class="px-2 text-right">العملة</th><th class="px-2">إجمالي المسجّل</th><th class="px-2">إجمالي الفعلي</th><th class="px-2">الفرق</th></tr></thead><tbody>${allRows}</tbody></table></div>
+      ${allOk && m.curs.length > 1 && anyEntered ? `<div class="mt-2 text-sm font-bold ${allDiffIls === 0 ? 'text-emerald-700' : allDiffIls > 0 ? 'text-sky-700' : 'text-rose-700'}">الفرق الكلي ≈ ${allDiffIls === 0 ? 'صفر' : (allDiffIls > 0 ? 'زيادة ' : 'عجز ') + fmt(Math.abs(allDiffIls)) + ' ₪'} <span class="eq-hint">(بأسعار الصرف المحفوظة)</span></div>` : ''}
+      <p class="eq-hint mt-1">يصح الفرق إذا أدخلتَ الرصيد الفعلي لكل تطبيقاتك (سامح ورواء وغيرهما).</p></div>`;
+    box.innerHTML = totalBlock + `<div class="card p-4 bg-slate-50 border-2 border-teal-200 mt-2"><div class="font-bold text-teal-800 mb-2">📊 تفصيل الأشخاص المعروضين فقط <span class="eq-hint">(مسجّلهم مقابل ما أدخلتَه لهم)</span></div>
+      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-xs text-slate-500"><th class="px-2 text-right">العملة</th><th class="px-2">مسجّل المعروضين</th><th class="px-2">إجمالي الفعلي المُدخل</th><th class="px-2">الفرق (على المُدخل فقط)</th></tr></thead><tbody>${rows}</tbody></table></div>
       ${ilsOk && m.curs.length > 1 && anyEntered ? `<div class="mt-2 text-sm font-bold ${ilsDiff === 0 ? 'text-emerald-700' : ilsDiff > 0 ? 'text-sky-700' : 'text-rose-700'}">الفرق الكلي ≈ ${ilsDiff === 0 ? 'صفر' : (ilsDiff > 0 ? 'زيادة ' : 'عجز ') + fmt(Math.abs(ilsDiff)) + ' ₪'} <span class="eq-hint">(بأسعار الصرف المحفوظة)</span></div>` : ''}
       ${S.missing ? `<div class="eq-hint mt-1 text-amber-700">⚠️ ${S.missing} خانة فيها رصيد مسجّل لم تُدخل فعليّها بعد، وهي غير داخلة في الفرق.</div>` : ''}</div>`;
 }
@@ -8072,7 +8083,8 @@ function reconClear() {
 function reconCopy() {
     const m = reconModel(), S = reconSummary(m); let t = `مطابقة الأرصدة — ${new Date().toLocaleDateString('ar-EG')}\n`;
     m.owners.forEach(o => { t += `\n${o}\n`; m.accs.forEach(a => m.curs.forEach(c => { const k = rcKey(o, a, c), rec = m.bal[k], act = m.st.actual[k]; if (rec === 0 && act == null) return; t += `  ${a} (${c}): مسجّل ${rec} | فعلي ${act == null ? '—' : act} | ${reconCell(rec, act).txt.replace(/[^؀-ۿ\d.\-+ ]/g, '').trim() || '—'}\n`; })); });
-    t += '\nالإجمالي:\n'; m.curs.forEach(c => { const p = S.per[c], d = round2(p.act - p.recEntered); t += `  ${c}: مسجّل ${round2(p.rec)} | فعلي ${round2(p.act)} | فرق ${d}\n`; });
+    t += '\nالإجمالي الكلي (كل أصحاب المال):\n'; m.curs.forEach(c => { const p = S.per[c], d = round2(p.act - p.all); t += `  ${c}: مسجّل ${p.all} | فعلي ${round2(p.act)} | ${d === 0 ? 'مطابق' : (d > 0 ? 'زيادة ' : 'عجز ') + Math.abs(d)}\n`; });
+    t += '\nالإجمالي (المعروضين فقط):\n'; m.curs.forEach(c => { const p = S.per[c], d = round2(p.act - p.recEntered); t += `  ${c}: مسجّل ${round2(p.rec)} | فعلي ${round2(p.act)} | فرق ${d}\n`; });
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('نُسخ التقرير', 'ok'), () => { prompt('انسخ التقرير:', t); });
 }
 
